@@ -10,75 +10,227 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="header">
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-icon">PHO</span>
-        <div>
-          <h1>Palawan Health Office</h1>
-          <p>Document Archive</p>
+  <div class="dashboard">
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon" aria-hidden="true">PHO</span>
+          <div class="logo-text">
+            <h1>Palawan Health Office</h1>
+            <p>Document Archive</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="realtime-clock" id="realtimeClock">
+            <span class="clock-date" id="clockDate"></span>
+            <span class="clock-time" id="clockTime"></span>
+          </div>
+          <div class="user-pill" id="userPill">
+            <img class="user-pill-avatar" id="userAvatar" src="" alt="" hidden>
+            <span class="user-pill-role" id="userRoleLabel">Staff</span>
+            <span class="user-pill-email" id="userEmailLabel">Not signed in</span>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn" title="Sign out" hidden>Sign out</button>
         </div>
       </div>
-      <div class="header-actions">
-        <div class="search-wrap">
-          <input type="search" id="searchInput" placeholder="Search documents..." aria-label="Search documents">
-          <span class="search-icon" aria-hidden="true">&#8981;</span>
+    </header>
+
+    <main class="main">
+      <aside class="sidebar">
+        <nav class="nav-main" aria-label="Main navigation">
+          <a href="#" class="nav-link active" data-view="dashboard">
+            <span class="nav-icon">&#128200;</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="#" class="nav-link" data-view="history">
+            <span class="nav-icon">&#128337;</span>
+            <span>History</span>
+          </a>
+          <a href="#" class="nav-link" data-view="settings">
+            <span class="nav-icon">&#9881;</span>
+            <span>Settings</span>
+          </a>
+          <a href="#" class="nav-link" data-view="profile">
+            <span class="nav-icon">&#128100;</span>
+            <span>Profile</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-section" id="sidebarFolders">
+          <div class="sidebar-head">
+            <span class="sidebar-title">Folders</span>
+            <button type="button" class="btn btn-sm btn-ghost" id="newFolderBtn" title="New folder">
+              <span class="btn-icon">+</span> New folder
+            </button>
+          </div>
+          <nav class="folder-tree" id="folderTree" aria-label="Folder navigation">
+            <div class="folder-item root" data-id="">
+              <button type="button" class="folder-link active" data-id="">
+                <span class="folder-icon">&#128193;</span>
+                <span>All Documents</span>
+              </button>
+            </div>
+            <div id="folderTreeList"></div>
+          </nav>
         </div>
-      </div>
-    </div>
-  </header>
+      </aside>
 
-  <main class="main">
-    <aside class="sidebar">
-      <div class="sidebar-head">
-        <h2>Folders</h2>
-        <button type="button" class="btn btn-ghost btn-icon" id="newFolderBtn" title="New folder">+ Folder</button>
-      </div>
-      <nav class="folder-tree" id="folderTree" aria-label="Folder navigation">
-        <div class="folder-item root" data-id="">
-          <button type="button" class="folder-link active" data-id="">
-            <span class="folder-icon">&#128193;</span>
-            <span>All Documents</span>
-          </button>
+      <section class="content">
+        <div class="content-card panel-content" id="panelDashboard">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2 class="card-title" id="breadcrumb">All Documents</h2>
+              <p class="card-subtitle">View and manage your archived files</p>
+            </div>
+            <div class="toolbar-actions">
+              <label class="btn btn-primary">
+                <input type="file" id="fileInput" multiple hidden>
+                <span class="btn-icon">&#8613;</span> Upload
+              </label>
+              <button type="button" class="btn btn-outline" id="refreshBtn" title="Refresh">
+                <span class="btn-icon">&#8635;</span> Refresh
+              </button>
+            </div>
+          </div>
+          <div class="upload-zone" id="uploadZone">
+            <span class="upload-zone-icon" aria-hidden="true">&#128206;</span>
+            <p>Drag files here or click <strong>Upload</strong> to add documents</p>
+          </div>
+          <div class="doc-section">
+            <div class="doc-list-wrap">
+              <table class="doc-table" id="docTable">
+                <thead>
+                  <tr>
+                    <th>File Name</th>
+                    <th>Title</th>
+                    <th>From</th>
+                    <th>Mail To:</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Viewed at</th>
+                    <th>Size</th>
+                    <th>Date</th>
+                    <th class="th-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="docTableBody">
+                  <tr class="empty-row"><td colspan="9">Select a folder or upload documents to get started.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div id="folderTreeList"></div>
-      </nav>
-    </aside>
 
-    <section class="content">
-      <div class="content-toolbar">
-        <div class="breadcrumb" id="breadcrumb">All Documents</div>
-        <div class="toolbar-actions">
-          <label class="btn btn-primary">
-            <input type="file" id="fileInput" multiple hidden>
-            Upload
-          </label>
-          <button type="button" class="btn btn-ghost" id="refreshBtn" title="Refresh">&#8635; Refresh</button>
+        <div class="content-card panel-content" id="panelHistory" hidden>
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2 class="card-title">Activity History</h2>
+              <p class="card-subtitle">Every file upload, view, download, and delete</p>
+            </div>
+            <div class="toolbar-actions">
+              <button type="button" class="btn btn-outline" id="refreshHistoryBtn" title="Refresh">&#8635; Refresh</button>
+              <button type="button" class="btn btn-ghost" id="clearHistoryBtn" title="Clear history">Clear</button>
+            </div>
+          </div>
+
+          <!-- Filter stat cards -->
+          <div class="history-filters" id="historyFilters">
+            <button type="button" class="history-filter-card active" data-filter="all">
+              <span class="hf-icon hf-all">&#128202;</span>
+              <span class="hf-count" id="hfCountAll">0</span>
+              <span class="hf-label">All</span>
+            </button>
+            <button type="button" class="history-filter-card" data-filter="upload">
+              <span class="hf-icon hf-upload">&#128228;</span>
+              <span class="hf-count" id="hfCountUpload">0</span>
+              <span class="hf-label">Uploaded</span>
+            </button>
+            <button type="button" class="history-filter-card" data-filter="view">
+              <span class="hf-icon hf-view">&#128065;</span>
+              <span class="hf-count" id="hfCountView">0</span>
+              <span class="hf-label">Viewed</span>
+            </button>
+            <button type="button" class="history-filter-card" data-filter="download">
+              <span class="hf-icon hf-download">&#128229;</span>
+              <span class="hf-count" id="hfCountDownload">0</span>
+              <span class="hf-label">Downloaded</span>
+            </button>
+          </div>
+
+          <div class="history-date-filter" id="historyDateFilter">
+            <label class="hdf-label">
+              <span>From</span>
+              <input type="date" id="historyDateFrom">
+            </label>
+            <label class="hdf-label">
+              <span>To</span>
+              <input type="date" id="historyDateTo">
+            </label>
+            <button type="button" class="btn btn-outline btn-sm" id="historyDateApply">Apply</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="historyDateClear">Clear</button>
+          </div>
+
+          <div class="doc-section">
+            <div class="doc-list-wrap">
+              <table class="doc-table history-table" id="historyTable">
+                <thead>
+                  <tr>
+                    <th>Date &amp; Time</th>
+                    <th>Action</th>
+                    <th>File / Item</th>
+                    <th>Folder</th>
+                    <th>Size</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                  <tr class="empty-row"><td colspan="5">No activity yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="upload-zone" id="uploadZone">
-        <p>Drag files here or click <strong>Upload</strong> to add documents</p>
-      </div>
+        <div class="content-card panel-content" id="panelSettings" hidden>
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2 class="card-title">Settings</h2>
+              <p class="card-subtitle">Application preferences</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="settings-group">
+              <h3 class="settings-group-title">Storage</h3>
+              <p class="settings-desc">Data is stored locally in your browser (IndexedDB). Clearing site data will remove all documents and folders.</p>
+            </div>
+            <div class="settings-group">
+              <h3 class="settings-group-title">History</h3>
+              <p class="settings-desc">Activity history is kept for uploads, views, downloads, and deletions. You can clear it from the History page.</p>
+            </div>
+          </div>
+        </div>
 
-      <div class="doc-list-wrap">
-        <table class="doc-table" id="docTable">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Size</th>
-              <th>Date</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="docTableBody">
-            <tr class="empty-row"><td colspan="5">Select a folder or upload documents.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+        <div class="content-card panel-content" id="panelProfile" hidden>
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2 class="card-title">Profile</h2>
+              <p class="card-subtitle">Your Google account details</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="profile-block">
+              <img class="profile-avatar-img" id="profileAvatar" src="" alt="" hidden>
+              <div class="profile-avatar" id="profileAvatarFallback" aria-hidden="true">PHO</div>
+              <div>
+                <h3 class="profile-org" id="profileName">—</h3>
+                <p class="profile-role" id="profileEmail">—</p>
+                <p class="profile-meta" id="profileRole">—</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <div class="modal" id="folderModal" role="dialog" aria-modal="true" aria-labelledby="folderModalTitle" hidden>
     <div class="modal-backdrop" data-close></div>
@@ -98,9 +250,108 @@
     </div>
   </div>
 
+  <div class="modal modal-viewer" id="viewerModal" role="dialog" aria-modal="true" aria-label="Document viewer" hidden>
+    <div class="modal-backdrop" data-close="viewer"></div>
+    <div class="modal-box modal-box-viewer">
+      <div class="viewer-header">
+        <h3 id="viewerModalTitle" class="viewer-title"></h3>
+        <button type="button" class="btn btn-ghost btn-icon viewer-close" data-close="viewer" title="Close" aria-label="Close">✕</button>
+      </div>
+      <div class="viewer-content" id="viewerContent"></div>
+      <div class="viewer-footer">
+        <div class="viewer-meta">
+          <span class="status-badge" id="viewerStatusBadge">Not viewed</span>
+          <span class="viewer-viewedat" id="viewerViewedAt">Viewed at: —</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="metaModal" role="dialog" aria-modal="true" aria-labelledby="metaModalTitle" hidden>
+    <div class="modal-backdrop" data-close="meta"></div>
+    <div class="modal-box modal-box-meta">
+      <h3 id="metaModalTitle">Document details</h3>
+      <p class="modal-help">Enter details so users can understand the file purpose before opening it.</p>
+      <div class="modal-file-row">
+        <span class="modal-file-label">File</span>
+        <span class="modal-file-name" id="metaFileName"></span>
+      </div>
+      <form id="metaForm">
+        <label>
+          <span>Title</span>
+          <input type="text" id="metaTitle" required placeholder="e.g. Barangay Health Report - Q1 2026">
+        </label>
+        <label>
+          <span>From (Office)</span>
+          <select id="metaFrom" required>
+            <option value="" disabled selected>Select office…</option>
+          </select>
+        </label>
+        <label>
+          <span>Gmail (Send to)</span>
+          <input type="email" id="metaGmail" required placeholder="e.g. person@gmail.com">
+        </label>
+        <label>
+          <span>Subject</span>
+          <input type="text" id="metaSubject" required placeholder="e.g. Monthly summary and action items">
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="meta">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save &amp; Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="commentModal" role="dialog" aria-modal="true" aria-labelledby="commentModalTitle" hidden>
+    <div class="modal-backdrop" data-close="comment"></div>
+    <div class="modal-box modal-box-meta">
+      <h3 id="commentModalTitle">Comment</h3>
+      <p class="modal-help">Add an optional note about the document.</p>
+      <div class="modal-file-row">
+        <span class="modal-file-label">File</span>
+        <span class="modal-file-name" id="commentFileName"></span>
+      </div>
+      <form id="commentForm">
+        <label>
+          <span>Comment (optional)</span>
+          <textarea id="commentText" rows="4" placeholder="Type your comment here..."></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="comment">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <span class="login-logo" aria-hidden="true">PHO</span>
+      <h2 class="login-title">Palawan Health Office</h2>
+      <p class="login-subtitle">Document Archive</p>
+      <p class="login-desc">Sign in to continue. Choose your role below.</p>
+      <form id="loginForm" class="login-form">
+        <div class="login-input-wrap">
+          <span class="login-input-icon" aria-hidden="true">&#9993;</span>
+          <input type="email" id="loginEmail" required placeholder="yourname@gmail.com" autocomplete="email" autofocus>
+        </div>
+        <div class="login-input-wrap">
+          <span class="login-input-icon" aria-hidden="true">&#128100;</span>
+          <select id="loginRole" class="login-select">
+            <option value="staff">Staff</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-login">Sign in</button>
+      </form>
+      <p class="login-footer">Your session is saved locally in this browser.</p>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="js/db.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=3"></script>
 </body>
 </html>
