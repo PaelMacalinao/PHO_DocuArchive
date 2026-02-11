@@ -22,7 +22,7 @@
       <div class="header-actions">
         <div class="search-wrap">
           <input type="search" id="searchInput" placeholder="Search documents..." aria-label="Search documents">
-          <span class="search-icon" aria-hidden="true">⌕</span>
+          <span class="search-icon" aria-hidden="true">&#8981;</span>
         </div>
       </div>
     </div>
@@ -37,7 +37,7 @@
       <nav class="folder-tree" id="folderTree" aria-label="Folder navigation">
         <div class="folder-item root" data-id="">
           <button type="button" class="folder-link active" data-id="">
-            <span class="folder-icon">📁</span>
+            <span class="folder-icon">&#128193;</span>
             <span>All Documents</span>
           </button>
         </div>
@@ -53,7 +53,7 @@
             <input type="file" id="fileInput" multiple hidden>
             Upload
           </label>
-          <button type="button" class="btn btn-ghost" id="refreshBtn" title="Refresh">↻ Refresh</button>
+          <button type="button" class="btn btn-ghost" id="refreshBtn" title="Refresh">&#8635; Refresh</button>
         </div>
       </div>
 
@@ -100,6 +100,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="js/db.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

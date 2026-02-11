@@ -1,5 +1,10 @@
 (function () {
-  const API = '/api';
+  const db = window.PHODB;
+  if (!db) {
+    console.error('PHODB not loaded. Ensure js/db.js is included before app.js.');
+    return;
+  }
+
   let currentFolderId = '';
   let folders = [];
   let documents = [];
@@ -21,7 +26,16 @@
     toast: document.getElementById('toast')
   };
 
-  function buildTree(parentId, depth = 0) {
+  function uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  function buildTree(parentId, depth) {
+    depth = depth || 0;
     const children = folders.filter(f => (f.parentId || '') === (parentId || ''));
     if (!children.length) return '';
     return children.map(f => {
@@ -32,7 +46,7 @@
             <span class="folder-icon">📁</span>
             <span>${escapeHtml(f.name)}</span>
           </button>
-          ${sub ? `<div class="folder-children">${sub}</div>` : ''}
+          ${sub ? '<div class="folder-children">' + sub + '</div>' : ''}
         </div>
       `;
     }).join('');
@@ -40,7 +54,7 @@
 
   function escapeHtml(s) {
     const div = document.createElement('div');
-    div.textContent = s;
+    div.textContent = s == null ? '' : s;
     return div.innerHTML;
   }
 
@@ -64,28 +78,26 @@
 
   async function loadFolders() {
     try {
-      const res = await fetch(`${API}/folders`);
-      if (!res.ok) throw new Error('Failed to load folders');
-      folders = await res.json();
+      folders = await db.getFolders();
       renderFolderTree();
     } catch (e) {
-      showToast(e.message, 'error');
+      showToast(e.message || 'Failed to load folders', 'error');
     }
   }
 
   async function loadDocuments() {
     try {
-      const params = new URLSearchParams();
-      if (currentFolderId) params.set('folderId', currentFolderId);
-      const q = (el.searchInput && el.searchInput.value || '').trim();
-      if (q) params.set('q', q);
-      const url = `${API}/documents?${params.toString()}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to load documents');
-      documents = await res.json();
+      let list = await db.getDocuments();
+      if (currentFolderId) list = list.filter(d => (d.folderId || '') === currentFolderId);
+      const q = (el.searchInput && el.searchInput.value || '').trim().toLowerCase();
+      if (q) list = list.filter(d =>
+        (d.originalName || '').toLowerCase().includes(q) ||
+        (d.description || '').toLowerCase().includes(q)
+      );
+      documents = list;
       renderDocuments();
     } catch (e) {
-      showToast(e.message, 'error');
+      showToast(e.message || 'Failed to load documents', 'error');
     }
   }
 
@@ -99,7 +111,7 @@
     try {
       const d = new Date(iso);
       return d.toLocaleDateString(undefined, { dateStyle: 'medium' });
-    } catch {
+    } catch (_) {
       return iso || '—';
     }
   }
@@ -120,7 +132,7 @@
         <td>
           <div class="doc-name">
             <span class="doc-name-icon">${fileIcon(doc.originalName)}</span>
-            <a href="${API}/documents/${doc.id}/download" download>${escapeHtml(doc.originalName)}</a>
+            <a href="#" class="doc-download" data-doc-id="${doc.id}">${escapeHtml(doc.originalName)}</a>
           </div>
         </td>
         <td><span class="doc-desc">${escapeHtml(doc.description || '—')}</span></td>
@@ -128,69 +140,87 @@
         <td class="doc-date">${formatDate(doc.createdAt)}</td>
         <td>
           <div class="doc-actions">
-            <a href="${API}/documents/${doc.id}/download" class="btn btn-ghost btn-danger" download title="Download">↓</a>
-            <button type="button" class="btn btn-danger" data-doc-id="${doc.id}" title="Delete">✕</button>
+            <button type="button" class="btn btn-ghost btn-danger doc-download" data-doc-id="${doc.id}" title="Download">↓</button>
+            <button type="button" class="btn btn-danger" data-doc-id="${doc.id}" data-delete title="Delete">✕</button>
           </div>
         </td>
       </tr>
     `).join('');
-    el.docTableBody.querySelectorAll('[data-doc-id]').forEach(btn => {
+
+    el.docTableBody.querySelectorAll('.doc-download').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.preventDefault(); downloadDocument(btn.dataset.docId); });
+    });
+    el.docTableBody.querySelectorAll('[data-delete]').forEach(btn => {
       btn.addEventListener('click', () => deleteDocument(btn.dataset.docId));
     });
+  }
+
+  async function downloadDocument(id) {
+    const doc = documents.find(d => d.id === id);
+    if (!doc) return;
+    try {
+      const blob = await db.getBlob(id);
+      if (!blob) {
+        showToast('File not found.', 'error');
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.originalName || 'download';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      showToast(e.message || 'Download failed', 'error');
+    }
   }
 
   async function deleteDocument(id) {
     if (!confirm('Delete this document? This cannot be undone.')) return;
     try {
-      const res = await fetch(`${API}/documents/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete');
+      await db.deleteDocument(id);
       showToast('Document deleted.');
       loadDocuments();
     } catch (e) {
-      showToast(e.message, 'error');
+      showToast(e.message || 'Delete failed', 'error');
     }
   }
 
-  function showToast(message, type = 'success') {
+  function showToast(message, type) {
+    type = type || 'success';
     el.toast.textContent = message;
-    el.toast.className = 'toast show ' + (type || '');
+    el.toast.className = 'toast show ' + type;
     clearTimeout(el.toast._tid);
-    el.toast._tid = setTimeout(() => {
+    el.toast._tid = setTimeout(function () {
       el.toast.classList.remove('show');
     }, 3000);
   }
 
-  // Upload: send one file per request so server receives field name "file"
   function uploadFiles(files, folderId) {
     const fileList = files ? Array.from(files) : [];
     if (!fileList.length) {
       showToast('Please select one or more files.', 'error');
       return;
     }
-    const targetFolderId = folderId !== undefined ? folderId : (currentFolderId || '');
-    let completed = 0;
-    let failed = 0;
-    fileList.forEach(file => {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('folderId', targetFolderId);
-      form.append('description', '');
-      fetch(`${API}/documents/upload`, { method: 'POST', body: form })
-        .then(res => {
-          return res.json().then(data => ({ ok: res.ok, data }));
+    const targetFolderId = folderId !== undefined ? folderId : (currentFolderId || null);
+    fileList.forEach(function (file) {
+      const id = uuid();
+      const doc = {
+        id: id,
+        folderId: targetFolderId,
+        originalName: file.name,
+        mimeType: file.type || 'application/octet-stream',
+        size: file.size,
+        description: null,
+        createdAt: new Date().toISOString()
+      };
+      db.saveDocument(doc)
+        .then(function () { return db.saveBlob(id, file); })
+        .then(function () {
+          showToast('"' + file.name + '" uploaded.');
+          loadDocuments();
         })
-        .then(({ ok, data }) => {
-          if (ok) {
-            completed++;
-            showToast(`"${file.name}" uploaded.`);
-            loadDocuments();
-          } else {
-            failed++;
-            showToast(data.error || 'Upload failed', 'error');
-          }
-        })
-        .catch(e => {
-          failed++;
+        .catch(function (e) {
           showToast(e.message || 'Upload failed', 'error');
         });
     });
@@ -201,22 +231,21 @@
     this.value = '';
   });
 
-  // Clicking the upload zone also opens file picker
   el.uploadZone.addEventListener('click', function (e) {
-    if (e.target === el.uploadZone || e.target.closest('.upload-zone p')) el.fileInput.click();
+    if (e.target === el.uploadZone || (e.target.closest && e.target.closest('.upload-zone p'))) el.fileInput.click();
   });
 
-  el.uploadZone.addEventListener('dragover', (e) => {
+  el.uploadZone.addEventListener('dragover', function (e) {
     e.preventDefault();
     e.stopPropagation();
     el.uploadZone.classList.add('dragover');
   });
-  el.uploadZone.addEventListener('dragleave', (e) => {
+  el.uploadZone.addEventListener('dragleave', function (e) {
     e.preventDefault();
     e.stopPropagation();
     el.uploadZone.classList.remove('dragover');
   });
-  el.uploadZone.addEventListener('drop', (e) => {
+  el.uploadZone.addEventListener('drop', function (e) {
     e.preventDefault();
     e.stopPropagation();
     el.uploadZone.classList.remove('dragover');
@@ -224,17 +253,18 @@
   });
 
   if (el.searchInput) {
-    let searchDebounce;
-    el.searchInput.addEventListener('input', () => {
+    var searchDebounce;
+    el.searchInput.addEventListener('input', function () {
       clearTimeout(searchDebounce);
       searchDebounce = setTimeout(loadDocuments, 250);
     });
   }
 
-  el.refreshBtn.addEventListener('click', () => { loadFolders(); loadDocuments(); });
+  el.refreshBtn.addEventListener('click', function () {
+    loadFolders().then(loadDocuments);
+  });
 
-  // Folder modal
-  el.newFolderBtn.addEventListener('click', () => {
+  el.newFolderBtn.addEventListener('click', function () {
     el.folderId.value = '';
     el.folderName.value = '';
     el.folderModal.querySelector('h3').textContent = 'New folder';
@@ -242,37 +272,42 @@
     el.folderName.focus();
   });
 
-  el.folderForm.addEventListener('submit', async (e) => {
+  el.folderForm.addEventListener('submit', async function (e) {
     e.preventDefault();
     const id = el.folderId.value;
     const name = el.folderName.value.trim();
     if (!name) return;
     try {
-      const url = id ? `${API}/folders/${id}` : `${API}/folders`;
-      const opts = {
-        method: id ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: id ? JSON.stringify({ name }) : JSON.stringify({ name, parentId: currentFolderId || null })
-      };
-      const res = await fetch(url, opts);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Request failed');
-      showToast(id ? 'Folder updated.' : 'Folder created.');
+      if (id) {
+        const folder = folders.find(f => f.id === id);
+        if (folder) {
+          folder.name = name;
+          await db.saveFolder(folder);
+          showToast('Folder updated.');
+        }
+      } else {
+        await db.saveFolder({
+          id: uuid(),
+          name: name,
+          parentId: currentFolderId || null,
+          createdAt: new Date().toISOString()
+        });
+        showToast('Folder created.');
+      }
       el.folderModal.hidden = true;
       loadFolders();
     } catch (err) {
-      showToast(err.message, 'error');
+      showToast(err.message || 'Request failed', 'error');
     }
   });
 
-  el.folderModal.querySelectorAll('[data-close]').forEach(node => {
-    node.addEventListener('click', () => { el.folderModal.hidden = true; });
+  el.folderModal.querySelectorAll('[data-close]').forEach(function (node) {
+    node.addEventListener('click', function () { el.folderModal.hidden = true; });
   });
 
-  el.folderModal.addEventListener('keydown', (e) => {
+  el.folderModal.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') el.folderModal.hidden = true;
   });
 
-  // Init
-  loadFolders().then(() => loadDocuments());
+  loadFolders().then(loadDocuments);
 })();

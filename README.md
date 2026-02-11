@@ -1,61 +1,58 @@
 # PHO Document Archive
 
-**Palawan Health Office (PHO) Document Archiving** — A web-based document management and archiving system inspired by Folderit, built for the Palawan Health Office.
+**Palawan Health Office (PHO) Document Archiving** — A web-based document management and archiving system. No Node.js or server required: everything runs in your browser and stores data locally with **IndexedDB**.
 
 ## Features
 
 - **Folder structure** — Create and organize folders (with optional nesting)
-- **Document upload** — Upload files via button or drag-and-drop; store in selected folder
+- **Document upload** — Upload files via button or drag-and-drop; files are stored in the browser
 - **Search** — Search documents by name or description
 - **Download & delete** — Download or remove documents from the archive
-- **Clean UI** — PHO-branded, responsive interface with teal/health-office styling
+- **Offline / no server** — No backend; works with just HTML, CSS, and JavaScript
 
-## Requirements
+## How to run
 
-- Node.js 18+ (or 16+)
+1. **Option A – Open the file**  
+   Double-click **`index.html`** or open it in your browser (e.g. drag `index.html` into Chrome or Edge).  
+   Some browsers may block IndexedDB when the page is opened as `file://`. If upload or storage does not work, use Option B.
 
-## Quick start
+2. **Option B – Simple local server (recommended)**  
+   Serve the folder with any static server, then open the URL in the browser. Examples:
 
-1. Install dependencies:
+   **Python 3:**
    ```bash
-   npm install
+   cd PHO_DocuArchive
+   python -m http.server 8080
    ```
+   Then open: **http://localhost:8080**
 
-2. Start the server:
+   **PHP:**
    ```bash
-   npm start
+   cd PHO_DocuArchive
+   php -S localhost:8080
    ```
+   Then open: **http://localhost:8080**
 
-3. Open in browser: **http://localhost:3000**
+   Or use your editor’s “Live Server” (e.g. VS Code / Cursor Live Server) and open the project folder.
 
 ## Project structure
 
 ```
 PHO_DocuArchive/
-├── server.js          # Express API + static server
-├── data/
-│   └── store.json     # Folders and document metadata (created on first run)
-├── uploads/           # Stored document files (created on first run)
-├── public/
-│   ├── index.html
-│   ├── css/style.css
-│   └── js/app.js
-├── package.json
+├── index.html      # Main page
+├── css/
+│   └── style.css   # Styles
+├── js/
+│   ├── db.js       # IndexedDB (folders, documents, file blobs)
+│   └── app.js      # UI and upload/list/download/delete logic
 └── README.md
 ```
 
-## API (for reference)
+## Where is data stored?
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/folders` | List all folders |
-| POST | `/api/folders` | Create folder (`name`, `parentId`) |
-| PATCH | `/api/folders/:id` | Rename folder |
-| DELETE | `/api/folders/:id` | Delete empty folder |
-| GET | `/api/documents?folderId=&q=` | List documents (optional filter and search) |
-| POST | `/api/documents/upload` | Upload file (multipart: `file`, `folderId`, `description`) |
-| GET | `/api/documents/:id/download` | Download document |
-| DELETE | `/api/documents/:id` | Delete document |
+- **Folders** and **document metadata** (name, size, date, folder) are stored in the browser’s **IndexedDB** (database name: `PHO_DocuArchive`).
+- **File contents** are stored as blobs in the same database.
+- Data stays on the device and in the browser profile; clearing site data or uninstalling the browser will remove it.
 
 ## License
 

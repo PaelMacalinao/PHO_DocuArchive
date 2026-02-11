@@ -30,7 +30,6 @@ body {
   line-height: 1.5;
 }
 
-/* Header */
 .header {
   background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
   color: #fff;
@@ -114,7 +113,6 @@ body {
   background: rgba(255,255,255,.25);
 }
 
-/* Main layout */
 .main {
   max-width: 1400px;
   margin: 0 auto;
@@ -131,7 +129,6 @@ body {
   }
 }
 
-/* Sidebar */
 .sidebar {
   background: var(--surface);
   border-radius: var(--radius);
@@ -208,7 +205,6 @@ body {
 .folder-item[data-depth="2"] { --depth: 2; }
 .folder-item[data-depth="3"] { --depth: 3; }
 
-/* Content */
 .content {
   background: var(--surface);
   border-radius: var(--radius);
@@ -238,7 +234,6 @@ body {
   gap: .5rem;
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -289,7 +284,6 @@ body {
   background: rgba(220, 38, 38, .1);
 }
 
-/* Upload zone */
 .upload-zone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);
@@ -312,7 +306,6 @@ body {
   color: var(--primary);
 }
 
-/* Table */
 .doc-list-wrap {
   overflow-x: auto;
 }
@@ -397,7 +390,6 @@ body {
   justify-content: flex-end;
 }
 
-/* Modal */
 .modal {
   position: fixed;
   inset: 0;
@@ -470,7 +462,6 @@ body {
   margin-top: 1.25rem;
 }
 
-/* Toast */
 .toast {
   position: fixed;
   bottom: 1.5rem;
