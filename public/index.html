@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHO Document Archive | Palawan Health Office</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">PHO</span>
+        <div>
+          <h1>Palawan Health Office</h1>
+          <p>Document Archive</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="search-wrap">
+          <input type="search" id="searchInput" placeholder="Search documents..." aria-label="Search documents">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h2>Folders</h2>
+        <button type="button" class="btn btn-ghost btn-icon" id="newFolderBtn" title="New folder">+ Folder</button>
+      </div>
+      <nav class="folder-tree" id="folderTree" aria-label="Folder navigation">
+        <div class="folder-item root" data-id="">
+          <button type="button" class="folder-link active" data-id="">
+            <span class="folder-icon">📁</span>
+            <span>All Documents</span>
+          </button>
+        </div>
+        <div id="folderTreeList"></div>
+      </nav>
+    </aside>
+
+    <section class="content">
+      <div class="content-toolbar">
+        <div class="breadcrumb" id="breadcrumb">All Documents</div>
+        <div class="toolbar-actions">
+          <label class="btn btn-primary">
+            <input type="file" id="fileInput" multiple hidden>
+            Upload
+          </label>
+          <button type="button" class="btn btn-ghost" id="refreshBtn" title="Refresh">↻ Refresh</button>
+        </div>
+      </div>
+
+      <div class="upload-zone" id="uploadZone">
+        <p>Drag files here or click <strong>Upload</strong> to add documents</p>
+      </div>
+
+      <div class="doc-list-wrap">
+        <table class="doc-table" id="docTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Size</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="docTableBody">
+            <tr class="empty-row"><td colspan="5">Select a folder or upload documents.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="folderModal" role="dialog" aria-modal="true" aria-labelledby="folderModalTitle" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box">
+      <h3 id="folderModalTitle">New folder</h3>
+      <form id="folderForm">
+        <input type="hidden" id="folderId">
+        <label>
+          <span>Folder name</span>
+          <input type="text" id="folderName" required placeholder="e.g. Medical Records 2024">
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
