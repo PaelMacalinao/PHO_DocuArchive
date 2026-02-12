@@ -1,20 +1,16 @@
 <?php
 /**
- * Email configuration for PHO Document Archive notifications.
- * Copy this file to email-config.php and fill in your values.
- * Do not commit email-config.php (add it to .gitignore).
+ * SENDER (built-in): This Gmail is always the sender of notification emails.
+ * RECEIVER: Whoever you type in "Gmail (Send to)" when uploading — they get the email.
  */
 
 // Base URL of your Document Archive (no trailing slash)
-// Local: http://localhost/PHO_DocuArchive
-// Production: https://your-domain.com/PHO_DocuArchive
 define('SITE_BASE_URL', 'http://localhost/PHO_DocuArchive');
 
-// Gmail SMTP (use App Password if 2FA is enabled)
-// Create App Password: Google Account → Security → 2-Step Verification → App passwords
+// ——— SENDER: Your Gmail (built-in). All emails are sent FROM this address. ———
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);
-define('SMTP_USER', 'your-gmail@gmail.com');
-define('SMTP_PASS', 'your-16-char-app-password');
-define('MAIL_FROM_EMAIL', 'your-gmail@gmail.com');
-define('MAIL_FROM_NAME', 'Palawan Health Office - Document Archive');
+define('SMTP_USER', 'johnrafaelmacalinao5183@gmail.com');
+define('SMTP_PASS', 'xppohjxcmmmxvbzm');  // Use App Password if 2FA is on: Google Account → Security → App passwords
+define('MAIL_FROM_EMAIL', 'johnrafaelmacalinao5183@gmail.com');  // Same as SMTP_USER = sender
+define('MAIL_FROM_NAME', 'Palawan Health Office - Document Archive');  // Name shown as sender

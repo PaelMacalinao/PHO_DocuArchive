@@ -19,6 +19,10 @@
   try {
     app = firebase.initializeApp(firebaseConfig);
     auth = app.auth();
+    // Keep users signed in across refresh / browser restarts
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () {
+      // If persistence setting fails, we still continue with default behavior.
+    });
   } catch (e) {
     console.error('Firebase Auth init failed', e);
     return;

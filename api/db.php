@@ -69,6 +69,16 @@ function rowToHistory($row) {
   ];
 }
 
+function rowToUser($row) {
+  return [
+    'email' => $row['email'] ?? null,
+    'name' => $row['name'] ?? null,
+    'role' => $row['role'] ?? null,
+    'picture' => $row['picture'] ?? null,
+    'lastLoginAt' => $row['last_login_at'] ?? null,
+  ];
+}
+
 // getBlob: return raw file (different response type)
 if (isset($_GET['action']) && $_GET['action'] === 'getBlob' && isset($_GET['id'])) {
   $id = preg_replace('/[^a-zA-Z0-9\-_]/', '', $_GET['id']);
@@ -269,6 +279,38 @@ try {
       $st = $pdo->prepare('DELETE FROM history WHERE document_id = ?');
       $st->execute([$docId]);
       echo json_encode(['ok' => true]);
+      break;
+    }
+
+    case 'saveUser': {
+      $user = $input['user'] ?? [];
+      $email = strtolower(trim($user['email'] ?? ''));
+      if ($email === '') {
+        echo json_encode(['error' => 'User email required']);
+        break;
+      }
+      $name = $user['name'] ?? null;
+      $role = $user['role'] ?? 'staff';
+      $picture = $user['picture'] ?? null;
+      $lastLoginAt = $user['lastLoginAt'] ?? date('c');
+      $st = $pdo->prepare('
+        INSERT INTO users (email, name, role, picture, last_login_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          name = VALUES(name),
+          role = VALUES(role),
+          picture = VALUES(picture),
+          last_login_at = VALUES(last_login_at)
+      ');
+      $st->execute([$email, $name, $role, $picture, $lastLoginAt]);
+      echo json_encode(['ok' => true]);
+      break;
+    }
+
+    case 'getUsers': {
+      $st = $pdo->query('SELECT * FROM users ORDER BY email');
+      $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+      echo json_encode(array_map('rowToUser', $rows));
       break;
     }
 

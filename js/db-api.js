@@ -118,6 +118,17 @@
     checkError(data);
   }
 
+  async function dbSaveUser(user) {
+    var data = await post({ action: 'saveUser', user: user });
+    checkError(data);
+  }
+
+  async function dbGetUsers() {
+    var data = await post({ action: 'getUsers' });
+    checkError(data);
+    return Array.isArray(data) ? data : [];
+  }
+
   window.PHODB = {
     getFolders: dbGetFolders,
     saveFolder: dbSaveFolder,
@@ -131,6 +142,8 @@
     addHistory: dbAddHistory,
     getHistory: dbGetHistory,
     clearHistory: dbClearHistory,
-    deleteHistoryByDocumentId: dbDeleteHistoryByDocumentId
+    deleteHistoryByDocumentId: dbDeleteHistoryByDocumentId,
+    saveUser: dbSaveUser,
+    getUsers: dbGetUsers
   };
 })();

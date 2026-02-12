@@ -15,6 +15,15 @@ CREATE TABLE IF NOT EXISTS folders (
   created_at VARCHAR(32) DEFAULT NULL
 );
 
+-- Users (staff/admin accounts that have signed in)
+CREATE TABLE IF NOT EXISTS users (
+  email VARCHAR(255) PRIMARY KEY,
+  name VARCHAR(255) DEFAULT NULL,
+  role VARCHAR(32) DEFAULT 'staff',
+  picture VARCHAR(512) DEFAULT NULL,
+  last_login_at VARCHAR(32) DEFAULT NULL
+);
+
 -- Document metadata (no file content here)
 CREATE TABLE IF NOT EXISTS documents (
   id VARCHAR(64) PRIMARY KEY,

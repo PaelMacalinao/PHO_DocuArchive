@@ -33,14 +33,7 @@ if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
   exit;
 }
 
-$uploadDir = __DIR__ . '/uploads';
-$attachmentPath = null;
-if ($documentId !== '') {
-  $safeId = preg_replace('/[^a-zA-Z0-9\-_]/', '', $documentId);
-  if ($safeId !== '' && is_file($uploadDir . '/' . $safeId)) {
-    $attachmentPath = $uploadDir . '/' . $safeId;
-  }
-}
+// We no longer attach the file to the email; recipient will open it via the archive link only.
 
 $siteUrl = defined('SITE_BASE_URL') ? rtrim(SITE_BASE_URL, '/') : '';
 if ($siteUrl === '') {
@@ -65,11 +58,8 @@ $mailFromName = defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : 'PHO Document Archi
 $autoload = __DIR__ . '/vendor/autoload.php';
 if (is_file($autoload)) {
   require $autoload;
-  use PHPMailer\PHPMailer\PHPMailer;
-  use PHPMailer\PHPMailer\SMTP;
-  use PHPMailer\PHPMailer\Exception;
 
-  $mail = new PHPMailer(true);
+  $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
   try {
     $mail->isSMTP();
     $mail->Host       = SMTP_HOST;
@@ -87,12 +77,6 @@ if (is_file($autoload)) {
     $mail->Body    = $emailBody;
     $mail->AltBody = $emailBody;
 
-    // Attach the uploaded file so the recipient gets it directly in Gmail
-    if ($attachmentPath !== null && is_file($attachmentPath)) {
-      $attachName = $fileName !== '' ? $fileName : basename($attachmentPath);
-      $mail->addAttachment($attachmentPath, $attachName);
-    }
-
     $mail->send();
     echo json_encode(['ok' => true]);
   } catch (Exception $e) {
@@ -101,11 +85,7 @@ if (is_file($autoload)) {
   exit;
 }
 
-// Fallback: PHP mail() — cannot attach files; send text only and suggest PHPMailer for attachments
-if ($attachmentPath !== null) {
-  echo json_encode(['ok' => false, 'error' => 'To send the file as attachment, install PHPMailer: in api folder run composer require phpmailer/phpmailer']);
-  exit;
-}
+// Fallback: PHP mail() — text only, no attachment
 $headers = [
   'From: ' . ($mailFromName ? "\"$mailFromName\" <$mailFromEmail>" : $mailFromEmail),
   'Reply-To: ' . $mailFromEmail,

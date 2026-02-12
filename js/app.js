@@ -45,6 +45,8 @@
   let currentCommentDocId = null;
   let currentUser = { email: '', role: 'staff', name: '', picture: '' };
 
+  let knownUsers = [];
+
   let viewerObjectUrl = null;
 
   const el = {
@@ -95,7 +97,7 @@
     metaFileName: document.getElementById('metaFileName'),
     metaTitle: document.getElementById('metaTitle'),
     metaFrom: document.getElementById('metaFrom'),
-    metaGmail: document.getElementById('metaGmail'),
+    metaReceiver: document.getElementById('metaReceiver'),
     metaSubject: document.getElementById('metaSubject'),
     userRoleLabel: document.getElementById('userRoleLabel'),
     userEmailLabel: document.getElementById('userEmailLabel'),
@@ -219,6 +221,16 @@
       picture: info.picture || ''
     };
     try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser)); } catch (_) {}
+
+    if (db && typeof db.saveUser === 'function' && currentUser.email) {
+      db.saveUser({
+        email: currentUser.email,
+        role: currentUser.role,
+        name: currentUser.name,
+        picture: currentUser.picture,
+        lastLoginAt: new Date().toISOString()
+      }).catch(function () { /* ignore */ });
+    }
   }
 
   function signOut() {
@@ -252,7 +264,26 @@
     renderUserPill();
     renderProfile();
     applyRoleUI();
+    if (isAdmin()) {
+      loadReceiversForAdmin();
+    }
     loadFolders().then(loadDocuments);
+  }
+
+  async function loadReceiversForAdmin() {
+    if (!isAdmin() || !el.metaReceiver || !db || typeof db.getUsers !== 'function') return;
+    try {
+      var list = await db.getUsers();
+      knownUsers = Array.isArray(list) ? list : [];
+      var options = '<option value="" disabled selected>Select receiver…</option>';
+      options += knownUsers.map(function (u) {
+        var label = (u.name && u.name.trim()) ? (u.name.trim() + ' (' + (u.email || '') + ')') : (u.email || '');
+        return '<option value="' + escapeHtml(u.email || '') + '">' + escapeHtml(label || '') + '</option>';
+      }).join('');
+      el.metaReceiver.innerHTML = options;
+    } catch (e) {
+      showToast(e.message || 'Failed to load receivers', 'error');
+    }
   }
 
   function renderUserPill() {
@@ -980,10 +1011,13 @@
     const next = uploadQueue.shift();
     if (!next) return;
     pendingUpload = next;
+    if (isAdmin()) {
+      loadReceiversForAdmin();
+    }
     el.metaFileName.textContent = next.file.name;
     el.metaTitle.value = '';
     el.metaFrom.selectedIndex = 0; // reset to "Select office…"
-    if (el.metaGmail) el.metaGmail.value = '';
+    if (el.metaReceiver) el.metaReceiver.selectedIndex = 0;
     el.metaSubject.value = '';
     el.metaModal.hidden = false;
     el.metaTitle.focus();
@@ -1108,9 +1142,10 @@
       }
 
       var gmailValue = (el.metaGmail ? el.metaGmail.value : '').trim();
-      if (!isValidEmail(gmailValue)) {
-        showToast('Please enter a valid Gmail address.', 'error');
-        if (el.metaGmail) el.metaGmail.focus();
+      var receiverEmail = (el.metaReceiver ? el.metaReceiver.value : '').trim();
+      if (!isValidEmail(receiverEmail)) {
+        showToast('Please select a valid receiver email.', 'error');
+        if (el.metaReceiver) el.metaReceiver.focus();
         return;
       }
 
@@ -1118,7 +1153,7 @@
       const id = uuid();
       const title = (el.metaTitle.value || '').trim();
       const subject = (el.metaSubject.value || '').trim();
-      const toEmail = normalizeEmail(gmailValue);
+      const toEmail = normalizeEmail(receiverEmail);
       const fromOffice = office.name;
 
       // Auto-assign to the matching office folder
@@ -1257,8 +1292,7 @@
 
       // Admin: single hardcoded account (phoadmin / phoadmin)
       if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        currentUser = { email: ADMIN_EMAIL, role: 'admin', name: '', picture: '' };
-        try { localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(currentUser)); } catch (_) {}
+        saveUser({ email: ADMIN_EMAIL, role: 'admin', name: '', picture: '' });
         hideLoginScreen();
         showToast('Signed in as Admin.');
         return;
@@ -1302,12 +1336,12 @@
             if (cred && cred.user) {
               var user = cred.user;
               auth.setUserRole(user.uid, user.email || '', 'staff').catch(function () {});
-              currentUser = {
+              saveUser({
                 email: user.email || '',
                 role: 'staff',
                 name: user.displayName || '',
                 picture: user.photoURL || ''
-              };
+              });
               hideLoginScreen();
               showToast('Signed in as staff with Google.');
             }
@@ -1340,25 +1374,26 @@
     if (loginDivider) loginDivider.style.display = '';
     if (googleSignInBtn) googleSignInBtn.style.display = '';
     if (el.loginPassword) el.loginPassword.required = false;
-    if (loadUser() && currentUser.email === ADMIN_EMAIL && currentUser.role === 'admin') {
+    // Always prefer stored session (admin or staff) so refresh does not log out
+    if (loadUser() && currentUser.email) {
       hideLoginScreen();
       return;
     }
     var auth = window.FirebaseAuth;
     auth.getRedirectResult()
       .then(function (result) {
-        if (result.user) {
-          var user = result.user;
-          auth.setUserRole(user.uid, user.email || '', 'staff').catch(function () {});
-          currentUser = {
-            email: user.email || '',
-            role: 'staff',
-            name: user.displayName || '',
-            picture: user.photoURL || ''
-          };
-          hideLoginScreen();
-          showToast('Signed in as staff with Google.');
-        }
+          if (result.user) {
+            var user = result.user;
+            auth.setUserRole(user.uid, user.email || '', 'staff').catch(function () {});
+            saveUser({
+              email: user.email || '',
+              role: 'staff',
+              name: user.displayName || '',
+              picture: user.photoURL || ''
+            });
+            hideLoginScreen();
+            showToast('Signed in as staff with Google.');
+          }
       })
       .catch(function (err) {
         if (err.code && err.code !== 'auth/popup-closed-by-user') {
@@ -1370,15 +1405,15 @@
           if (user) {
             if (!currentUser.email) {
               auth.getUserRole(user.uid).then(function (role) {
-                currentUser = {
+                saveUser({
                   email: user.email || '',
                   role: role || 'staff',
                   name: user.displayName || '',
                   picture: user.photoURL || ''
-                };
+                });
                 hideLoginScreen();
               }).catch(function () {
-                currentUser = { email: user.email || '', role: 'staff', name: '', picture: user.photoURL || '' };
+                saveUser({ email: user.email || '', role: 'staff', name: '', picture: user.photoURL || '' });
                 hideLoginScreen();
               });
             }
