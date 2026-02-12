@@ -176,6 +176,7 @@
     form.append('subject', (payload.subject || '').trim());
     form.append('title', (payload.title || '').trim());
     form.append('fileName', (payload.fileName || '').trim());
+    if (payload.documentId) form.append('documentId', payload.documentId);
     return fetch('api/send-notification.php', {
       method: 'POST',
       body: form
@@ -1162,7 +1163,8 @@
             toEmail: toEmail,
             subject: subject,
             title: title || file.name,
-            fileName: file.name
+            fileName: file.name,
+            documentId: id
           }).catch(function () {});
         })
         .catch(function (err) {

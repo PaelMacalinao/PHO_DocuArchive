@@ -26,10 +26,20 @@ $toEmail = isset($_POST['toEmail']) ? trim((string) $_POST['toEmail']) : '';
 $subject = isset($_POST['subject']) ? trim((string) $_POST['subject']) : '';
 $title = isset($_POST['title']) ? trim((string) $_POST['title']) : '';
 $fileName = isset($_POST['fileName']) ? trim((string) $_POST['fileName']) : '';
+$documentId = isset($_POST['documentId']) ? trim((string) $_POST['documentId']) : '';
 
 if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
   echo json_encode(['ok' => false, 'error' => 'Invalid recipient email']);
   exit;
+}
+
+$uploadDir = __DIR__ . '/uploads';
+$attachmentPath = null;
+if ($documentId !== '') {
+  $safeId = preg_replace('/[^a-zA-Z0-9\-_]/', '', $documentId);
+  if ($safeId !== '' && is_file($uploadDir . '/' . $safeId)) {
+    $attachmentPath = $uploadDir . '/' . $safeId;
+  }
 }
 
 $siteUrl = defined('SITE_BASE_URL') ? rtrim(SITE_BASE_URL, '/') : '';
@@ -77,6 +87,12 @@ if (is_file($autoload)) {
     $mail->Body    = $emailBody;
     $mail->AltBody = $emailBody;
 
+    // Attach the uploaded file so the recipient gets it directly in Gmail
+    if ($attachmentPath !== null && is_file($attachmentPath)) {
+      $attachName = $fileName !== '' ? $fileName : basename($attachmentPath);
+      $mail->addAttachment($attachmentPath, $attachName);
+    }
+
     $mail->send();
     echo json_encode(['ok' => true]);
   } catch (Exception $e) {
@@ -85,7 +101,11 @@ if (is_file($autoload)) {
   exit;
 }
 
-// Fallback: PHP mail() (often blocked or unreliable on localhost)
+// Fallback: PHP mail() — cannot attach files; send text only and suggest PHPMailer for attachments
+if ($attachmentPath !== null) {
+  echo json_encode(['ok' => false, 'error' => 'To send the file as attachment, install PHPMailer: in api folder run composer require phpmailer/phpmailer']);
+  exit;
+}
 $headers = [
   'From: ' . ($mailFromName ? "\"$mailFromName\" <$mailFromEmail>" : $mailFromEmail),
   'Reply-To: ' . $mailFromEmail,

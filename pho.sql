@@ -1,0 +1,1 @@
+SELECT * FROM pho_docuarchive.history;
