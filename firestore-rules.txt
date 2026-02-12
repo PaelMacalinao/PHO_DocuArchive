@@ -1,0 +1,21 @@
+// Copy these rules in Firebase Console → Firestore Database → Rules
+// This allows authenticated users to read/write their own profile in "users" collection,
+// and to read/write folders, documents, history (for the app to work).
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /folders/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    match /documents/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    match /history/{docId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

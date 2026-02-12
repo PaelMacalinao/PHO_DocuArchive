@@ -1,0 +1,7 @@
+{
+  "name": "pho-docuarchive/api",
+  "description": "Email notification API for PHO Document Archive",
+  "require": {
+    "phpmailer/phpmailer": "^6.9"
+  }
+}

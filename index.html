@@ -14,23 +14,37 @@
     <header class="header">
       <div class="header-inner">
         <div class="logo">
-          <span class="logo-icon" aria-hidden="true">PHO</span>
+          <img src="img/pho-logo.png" alt="PHO Logo" class="logo-img">
           <div class="logo-text">
             <h1>Palawan Health Office</h1>
             <p>Document Archive</p>
           </div>
+          <img src="img/palawan-logo.png" alt="Province of Palawan Logo" class="logo-img">
         </div>
         <div class="header-actions">
           <div class="realtime-clock" id="realtimeClock">
             <span class="clock-date" id="clockDate"></span>
             <span class="clock-time" id="clockTime"></span>
           </div>
-          <div class="user-pill" id="userPill">
-            <img class="user-pill-avatar" id="userAvatar" src="" alt="" hidden>
-            <span class="user-pill-role" id="userRoleLabel">Staff</span>
-            <span class="user-pill-email" id="userEmailLabel">Not signed in</span>
+          <div class="user-badge-wrap" id="userBadgeWrap">
+            <button type="button" class="user-badge" id="userBadge">
+              <span class="user-badge-icon">&#128100;</span>
+              <span class="user-badge-role" id="userRoleLabel">Staff</span>
+            </button>
+            <div class="user-dropdown" id="userDropdown" hidden>
+              <div class="user-dropdown-header">
+                <span class="user-dropdown-icon">&#128100;</span>
+                <div class="user-dropdown-info">
+                  <span class="user-dropdown-role" id="userDropdownRole">Staff</span>
+                  <span class="user-dropdown-email" id="userEmailLabel">Not signed in</span>
+                </div>
+              </div>
+              <div class="user-dropdown-divider"></div>
+              <button type="button" class="user-dropdown-item" id="signOutBtn">
+                <span>&#9211;</span> Sign out
+              </button>
+            </div>
           </div>
-          <button type="button" class="btn btn-ghost btn-sm" id="signOutBtn" title="Sign out" hidden>Sign out</button>
         </div>
       </div>
     </header>
@@ -262,6 +276,8 @@
         <div class="viewer-meta">
           <span class="status-badge" id="viewerStatusBadge">Not viewed</span>
           <span class="viewer-viewedat" id="viewerViewedAt">Viewed at: —</span>
+          <a id="viewerOpenNewTab" class="btn btn-ghost btn-sm" href="#" target="_blank" rel="noopener" style="display:none;">Open in new tab</a>
+          <a id="viewerDownloadLink" class="btn btn-outline btn-sm viewer-download" href="#" download style="display:none;">Download</a>
         </div>
       </div>
     </div>
@@ -327,31 +343,41 @@
 
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
-      <span class="login-logo" aria-hidden="true">PHO</span>
+      <div class="login-logos">
+        <img src="img/pho-logo.png" alt="PHO Logo" class="login-logo-img">
+        <img src="img/palawan-logo.png" alt="Province of Palawan Logo" class="login-logo-img">
+      </div>
       <h2 class="login-title">Palawan Health Office</h2>
       <p class="login-subtitle">Document Archive</p>
-      <p class="login-desc">Sign in to continue. Choose your role below.</p>
+      <p class="login-desc" id="loginDesc">Admin: phoadmin / phoadmin. Staff: sign in with Google.</p>
       <form id="loginForm" class="login-form">
         <div class="login-input-wrap">
           <span class="login-input-icon" aria-hidden="true">&#9993;</span>
-          <input type="email" id="loginEmail" required placeholder="yourname@gmail.com" autocomplete="email" autofocus>
+          <input type="text" id="loginEmail" placeholder="Admin: phoadmin" autocomplete="username" autofocus>
         </div>
-        <div class="login-input-wrap">
-          <span class="login-input-icon" aria-hidden="true">&#128100;</span>
-          <select id="loginRole" class="login-select">
-            <option value="staff">Staff</option>
-            <option value="admin">Admin</option>
-          </select>
+        <div class="login-input-wrap" id="loginPasswordWrap">
+          <span class="login-input-icon" aria-hidden="true">&#128274;</span>
+          <input type="password" id="loginPassword" placeholder="Admin: phoadmin" autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-primary btn-login">Sign in</button>
+        <button type="submit" class="btn btn-primary btn-login" id="loginSubmitBtn">Admin sign in</button>
       </form>
-      <p class="login-footer">Your session is saved locally in this browser.</p>
+      <div class="login-divider" id="loginDivider">
+        <span>— Staff: sign in with Google —</span>
+      </div>
+      <button type="button" class="btn btn-google" id="googleSignInBtn">
+        <span class="btn-google-icon">G</span> Sign in with Google
+      </button>
+      <p class="login-footer" id="loginFooter">Staff must use a real Google account.</p>
     </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/db.js"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/db-api.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/firebase-auth.js"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

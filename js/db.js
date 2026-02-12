@@ -113,7 +113,15 @@ async function dbSaveBlob(id, blob) {
 
 async function dbGetBlob(id) {
   const row = await get(STORE_BLOBS, id);
-  return row && row.blob != null ? row.blob : null;
+  if (!row || row.blob == null) return null;
+  const b = row.blob;
+  if (!(b instanceof Blob)) return null;
+  // Some browsers need a fresh Blob from IndexedDB data for createObjectURL to work
+  try {
+    return b.slice(0, b.size, b.type || 'application/octet-stream');
+  } catch (_) {
+    return new Blob([b], { type: b.type || 'application/octet-stream' });
+  }
 }
 
 // Activity history (upload, view, download, delete)
