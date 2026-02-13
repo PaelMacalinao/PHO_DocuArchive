@@ -1,7 +1,7 @@
 <?php
 /**
  * Sends a notification email to the recipient when admin uploads a document.
- * Expects POST: toEmail, subject, title, fileName
+ * Expects POST: toEmail, subject, title, fileName, priority, documentId, dueDate (optional)
  * Returns JSON: { "ok": true } or { "ok": false, "error": "message" }
  */
 header('Content-Type: application/json; charset=utf-8');
@@ -28,6 +28,20 @@ $title = isset($_POST['title']) ? trim((string) $_POST['title']) : '';
 $fileName = isset($_POST['fileName']) ? trim((string) $_POST['fileName']) : '';
 $documentId = isset($_POST['documentId']) ? trim((string) $_POST['documentId']) : '';
 $priority = isset($_POST['priority']) ? trim((string) $_POST['priority']) : 'regular';
+$dueDateRaw = isset($_POST['dueDate']) ? trim((string) $_POST['dueDate']) : '';
+
+// Normalize/format due date (stored as YYYY-MM-DD from the UI)
+$dueDateLabel = '—';
+if ($dueDateRaw !== '') {
+  $dt = \DateTime::createFromFormat('Y-m-d', $dueDateRaw);
+  if ($dt instanceof \DateTime) {
+    // Example: Feb 13, 2026
+    $dueDateLabel = $dt->format('M j, Y');
+  } else {
+    // Fallback: show raw string
+    $dueDateLabel = $dueDateRaw;
+  }
+}
 
 if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
   echo json_encode(['ok' => false, 'error' => 'Invalid recipient email']);
@@ -54,6 +68,9 @@ $priorityLabel = $priorityLabels[$priority] ?? 'Regular';
 $emailBody .= "Priority: " . $priorityLabel . "\n";
 $emailBody .= "Title: " . ($title ?: '—') . "\n";
 $emailBody .= "File: " . ($fileName ?: '—') . "\n";
+if ($dueDateRaw !== '') {
+  $emailBody .= "Due Date: " . $dueDateLabel . "\n";
+}
 if ($subject) $emailBody .= "Subject: " . $subject . "\n";
 $emailBody .= "\nOpen the link below to view the document in the Document Archive.\n";
 $emailBody .= $viewLink . "\n\n";
@@ -66,6 +83,7 @@ $subjectEsc = htmlspecialchars($subject ?: '—', ENT_QUOTES, 'UTF-8');
 $viewLinkEsc = htmlspecialchars($viewLink, ENT_QUOTES, 'UTF-8');
 $priorityColor = ['critical' => '#b91c1c', 'urgent' => '#c2410c', 'priority' => '#1d4ed8', 'regular' => '#4b5563'][$priority] ?? '#4b5563';
 $priorityEsc = htmlspecialchars($priorityLabel, ENT_QUOTES, 'UTF-8');
+$dueDateEsc = htmlspecialchars($dueDateLabel, ENT_QUOTES, 'UTF-8');
 
 $emailBodyHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;font-family:\'Segoe UI\',Tahoma,Geneva,Verdana,sans-serif;background-color:#f4f6f8;">';
 $emailBodyHtml .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:32px 16px;">';
@@ -86,6 +104,7 @@ $emailBodyHtml .= '<p style="margin:0 0 24px;font-size:15px;line-height:1.6;colo
 $emailBodyHtml .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;margin-bottom:28px;">';
 $emailBodyHtml .= '<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#718096;">Priority</td><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:' . $priorityColor . ';">' . $priorityEsc . '</span></td></tr>';
 $emailBodyHtml .= '<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#718096;">Title</td><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#2d3748;font-weight:500;">' . $titleEsc . '</td></tr>';
+$emailBodyHtml .= '<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#718096;">Due Date</td><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#2d3748;">' . $dueDateEsc . '</td></tr>';
 $emailBodyHtml .= '<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#718096;">File</td><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#2d3748;">' . $fileNameEsc . '</td></tr>';
 $emailBodyHtml .= '<tr><td style="padding:16px 20px;font-size:13px;color:#718096;">Subject</td><td style="padding:16px 20px;font-size:14px;color:#2d3748;">' . $subjectEsc . '</td></tr>';
 $emailBodyHtml .= '</table>';

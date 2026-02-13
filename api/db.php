@@ -48,7 +48,7 @@ function rowToDocument($row) {
     'priority' => $row['priority'] ?? 'regular',
     'from' => $row['from'] ?? null,
     'toEmail' => $row['to_email'] ?? null,
-    'dueDate' => $row['due_date'] ?? null,
+    'dueDate' => $row['due_at'] ?? null,
     'subject' => $row['subject'] ?? null,
     'description' => $row['description'] ?? null,
     'status' => $row['status'] ?? null,
@@ -188,11 +188,11 @@ try {
         break;
       }
       $st = $pdo->prepare('
-        INSERT INTO documents (id, folder_id, original_name, mime_type, size, title, priority, `from`, to_email, due_date, subject, description, status, viewed_at, comment, created_by_email, created_at)
+        INSERT INTO documents (id, folder_id, original_name, mime_type, size, title, priority, `from`, to_email, due_at, subject, description, status, viewed_at, comment, created_by_email, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
         folder_id = VALUES(folder_id), original_name = VALUES(original_name), mime_type = VALUES(mime_type), size = VALUES(size),
-        title = VALUES(title), priority = VALUES(priority), `from` = VALUES(`from`), to_email = VALUES(to_email), due_date = VALUES(due_date), subject = VALUES(subject), description = VALUES(description),
+        title = VALUES(title), priority = VALUES(priority), `from` = VALUES(`from`), to_email = VALUES(to_email), due_at = VALUES(due_at), subject = VALUES(subject), description = VALUES(description),
         status = VALUES(status), viewed_at = VALUES(viewed_at), comment = VALUES(comment), created_by_email = VALUES(created_by_email), created_at = VALUES(created_at)
       ');
       $st->execute([

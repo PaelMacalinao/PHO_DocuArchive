@@ -831,9 +831,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .95rem;
-  color: var(--text-muted);
+  font-size: 1rem;
+  color: #6b7280;
   pointer-events: none;
+  filter: grayscale(100%) brightness(0.7);
+  opacity: 0.8;
 }
 
 .doc-search-input {
@@ -900,6 +902,7 @@ body {
   background: transparent;
   color: var(--text);
   border: 1.5px solid var(--border);
+  border-radius: 9999px;
   transition: all .2s ease;
 }
 
@@ -1046,17 +1049,17 @@ body.user-staff .bulk-actions-bar {
   border-collapse: collapse;
   font-size: 13px;
   table-layout: fixed;
-  min-width: 1500px;
+  min-width: 1335px; /* Original 1500px - 90px (Size) - 75px (Actions) */
 }
 
-/* Adjust table width for staff (no Select and Actions columns) */
+/* Adjust table width for staff (no Select, Actions, and Size columns) */
 .doc-table:not(.admin-table) {
-  min-width: 1380px; /* 1500px - 45px (Select) - 75px (Actions) */
+  min-width: 1290px; /* 1335px - 45px (Select) */
 }
 
 /* Responsive: On larger screens, table expands to fill available width */
 /* Column widths scale proportionally while maintaining their relative sizes */
-@media (min-width: 1500px) {
+@media (min-width: 1335px) {
   .doc-table.admin-table {
     width: 100%;
     min-width: 100%;
@@ -1065,32 +1068,30 @@ body.user-staff .bulk-actions-bar {
   .doc-table.admin-table {
     table-layout: auto;
   }
-  /* Maintain proportional widths using percentages based on original pixel widths */
+  /* Maintain proportional widths using percentages (Size and Actions columns hidden, total 1335px) */
   .doc-table.admin-table th:nth-child(1),
-  .doc-table.admin-table td:nth-child(1) { width: 3%; min-width: 45px; }   /* 45/1500 = 3% */
+  .doc-table.admin-table td:nth-child(1) { width: 3.37%; min-width: 45px; }   /* 45/1335 */
   .doc-table.admin-table th:nth-child(2),
-  .doc-table.admin-table td:nth-child(2) { width: 20%; min-width: 300px; }  /* 300/1500 = 20% */
+  .doc-table.admin-table td:nth-child(2) { width: 22.47%; min-width: 300px; }  /* 300/1335 */
   .doc-table.admin-table th:nth-child(3),
-  .doc-table.admin-table td:nth-child(3) { width: 12%; min-width: 180px; }  /* 180/1500 = 12% */
+  .doc-table.admin-table td:nth-child(3) { width: 13.48%; min-width: 180px; }  /* 180/1335 */
   .doc-table.admin-table th:nth-child(4),
-  .doc-table.admin-table td:nth-child(4) { width: 6%; min-width: 90px; }   /* 90/1500 = 6% */
+  .doc-table.admin-table td:nth-child(4) { width: 6.74%; min-width: 90px; }   /* 90/1335 */
   .doc-table.admin-table th:nth-child(5),
-  .doc-table.admin-table td:nth-child(5) { width: 10%; min-width: 150px; }  /* 150/1500 = 10% */
+  .doc-table.admin-table td:nth-child(5) { width: 11.24%; min-width: 150px; }  /* 150/1335 */
   .doc-table.admin-table th:nth-child(6),
-  .doc-table.admin-table td:nth-child(6) { width: 12%; min-width: 180px; }  /* 180/1500 = 12% */
+  .doc-table.admin-table td:nth-child(6) { width: 13.48%; min-width: 180px; }  /* 180/1335 */
   .doc-table.admin-table th:nth-child(7),
-  .doc-table.admin-table td:nth-child(7) { width: 8%; min-width: 120px; }  /* 120/1500 = 8% */
+  .doc-table.admin-table td:nth-child(7) { width: 8.99%; min-width: 120px; }  /* 120/1335 */
   .doc-table.admin-table th:nth-child(8),
-  .doc-table.admin-table td:nth-child(8) { width: 10%; min-width: 150px; }  /* 150/1500 = 10% */
+  .doc-table.admin-table td:nth-child(8) { width: 11.24%; min-width: 150px; }  /* 150/1335 */
   .doc-table.admin-table th:nth-child(9),
-  .doc-table.admin-table td:nth-child(9) { width: 6%; min-width: 90px; }  /* 90/1500 = 6% */
+  .doc-table.admin-table td:nth-child(9) { display: none !important; }  /* Size - HIDDEN */
   .doc-table.admin-table th:nth-child(10),
-  .doc-table.admin-table td:nth-child(10) { width: 8%; min-width: 120px; }  /* 120/1500 = 8% */
-  .doc-table.admin-table th:nth-child(11),
-  .doc-table.admin-table td:nth-child(11) { width: 5%; min-width: 75px; }  /* 75/1500 = 5% */
+  .doc-table.admin-table td:nth-child(10) { width: 8.99%; min-width: 120px; }  /* 120/1335 */
 }
 
-@media (min-width: 1380px) {
+@media (min-width: 1290px) {
   .doc-table:not(.admin-table) {
     width: 100%;
     min-width: 100%;
@@ -1099,28 +1100,28 @@ body.user-staff .bulk-actions-bar {
   .doc-table:not(.admin-table) {
     table-layout: auto;
   }
-  /* Maintain proportional widths using percentages (staff: 9 columns, total 1380px) */
+  /* Maintain proportional widths using percentages (staff: 8 columns, total 1290px, Size hidden) */
   .doc-table:not(.admin-table) th:nth-child(2),
-  .doc-table:not(.admin-table) td:nth-child(2) { width: 21.74%; min-width: 300px; }  /* 300/1380 */
+  .doc-table:not(.admin-table) td:nth-child(2) { width: 23.26%; min-width: 300px; }  /* 300/1290 */
   .doc-table:not(.admin-table) th:nth-child(3),
-  .doc-table:not(.admin-table) td:nth-child(3) { width: 13.04%; min-width: 180px; }  /* 180/1380 */
+  .doc-table:not(.admin-table) td:nth-child(3) { width: 13.95%; min-width: 180px; }  /* 180/1290 */
   .doc-table:not(.admin-table) th:nth-child(4),
-  .doc-table:not(.admin-table) td:nth-child(4) { width: 6.52%; min-width: 90px; }   /* 90/1380 */
+  .doc-table:not(.admin-table) td:nth-child(4) { width: 6.98%; min-width: 90px; }   /* 90/1290 */
   .doc-table:not(.admin-table) th:nth-child(5),
-  .doc-table:not(.admin-table) td:nth-child(5) { width: 10.87%; min-width: 150px; }  /* 150/1380 */
+  .doc-table:not(.admin-table) td:nth-child(5) { width: 11.63%; min-width: 150px; }  /* 150/1290 */
   .doc-table:not(.admin-table) th:nth-child(6),
-  .doc-table:not(.admin-table) td:nth-child(6) { width: 13.04%; min-width: 180px; }  /* 180/1380 */
+  .doc-table:not(.admin-table) td:nth-child(6) { width: 13.95%; min-width: 180px; }  /* 180/1290 */
   .doc-table:not(.admin-table) th:nth-child(7),
-  .doc-table:not(.admin-table) td:nth-child(7) { width: 8.70%; min-width: 120px; }  /* 120/1380 */
+  .doc-table:not(.admin-table) td:nth-child(7) { width: 9.30%; min-width: 120px; }  /* 120/1290 */
   .doc-table:not(.admin-table) th:nth-child(8),
-  .doc-table:not(.admin-table) td:nth-child(8) { width: 10.87%; min-width: 150px; }  /* 150/1380 */
+  .doc-table:not(.admin-table) td:nth-child(8) { width: 11.63%; min-width: 150px; }  /* 150/1290 */
   .doc-table:not(.admin-table) th:nth-child(9),
-  .doc-table:not(.admin-table) td:nth-child(9) { width: 6.52%; min-width: 90px; }  /* 90/1380 */
+  .doc-table:not(.admin-table) td:nth-child(9) { display: none !important; }  /* Size - HIDDEN */
   .doc-table:not(.admin-table) th:nth-child(10),
-  .doc-table:not(.admin-table) td:nth-child(10) { width: 8.70%; min-width: 120px; }  /* 120/1380 */
+  .doc-table:not(.admin-table) td:nth-child(10) { width: 9.30%; min-width: 120px; }  /* 120/1290 */
 }
 
-/* Column widths: 11 columns (Select + 10) – Fixed pixel widths, locked */
+/* Column widths: 10 columns (Select + 9, Size hidden) – Fixed pixel widths, locked */
 .doc-table th:nth-child(1),
 .doc-table td:nth-child(1)  { width: 45px; min-width: 45px; max-width: 45px; }   /* Select */
 .doc-table th:nth-child(2),
@@ -1138,20 +1139,26 @@ body.user-staff .bulk-actions-bar {
 .doc-table th:nth-child(8),
 .doc-table td:nth-child(8)  { width: 150px; min-width: 150px; max-width: 150px; }  /* Viewed at */
 .doc-table th:nth-child(9),
-.doc-table td:nth-child(9)  { width: 90px; min-width: 90px; max-width: 90px; }  /* Size */
+.doc-table td:nth-child(9)  { width: 90px; min-width: 90px; max-width: 90px; display: none; }  /* Size - HIDDEN */
 .doc-table th:nth-child(10),
 .doc-table td:nth-child(10) { width: 120px; min-width: 120px; max-width: 120px; }  /* Date */
-.doc-table th:nth-child(11),
-.doc-table td:nth-child(11) { width: 75px; min-width: 75px; max-width: 75px; }  /* Actions */
 
-/* Hide Select and Actions columns for non-admin (staff view); same column widths as admin */
+/* Hide Select column for non-admin (staff view) */
 .doc-table:not(.admin-table) th.th-select,
 .doc-table:not(.admin-table) td.doc-cell-select {
   display: none;
 }
-.doc-table:not(.admin-table) th.th-actions,
-.doc-table:not(.admin-table) td:nth-child(11) {
-  display: none;
+
+/* Hide Actions column for all users (moved to viewer) */
+.doc-table th.th-actions,
+.doc-table td:nth-child(11) {
+  display: none !important;
+}
+
+/* Hide Size column for all users */
+.doc-table th:nth-child(9),
+.doc-table td:nth-child(9) {
+  display: none !important;
 }
 
 .doc-table th {
@@ -1540,6 +1547,46 @@ body.user-staff .bulk-actions-bar {
   background: linear-gradient(135deg, rgba(198, 40, 40, .15) 0%, rgba(198, 40, 40, .1) 100%);
   color: var(--danger);
   font-weight: 600;
+}
+
+/* ----- Due date indicators ----- */
+.due-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .15rem;
+}
+
+.due-date-main {
+  font-size: .85rem;
+}
+
+.due-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .15rem .5rem;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.due-chip-ok {
+  background: linear-gradient(135deg, rgba(46, 125, 50, .12) 0%, rgba(46, 125, 50, .06) 100%);
+  color: var(--primary);
+}
+
+.due-chip-soon {
+  background: linear-gradient(135deg, rgba(234, 179, 8, .16) 0%, rgba(234, 179, 8, .08) 100%);
+  color: #92400e;
+}
+
+.due-chip-overdue {
+  background: linear-gradient(135deg, rgba(220, 38, 38, .18) 0%, rgba(220, 38, 38, .1) 100%);
+  color: #b91c1c;
 }
 
 .history-table .history-folder,
@@ -1982,29 +2029,7 @@ body.user-staff .bulk-actions-bar {
   box-shadow: 0 2px 4px rgba(198, 40, 40, 0.15);
 }
 
-.due-date-hint {
-  display: block;
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  color: #6b7280;
-  font-style: normal;
-  opacity: 0.85;
-  line-height: 1.5;
-  padding-left: 0.25rem;
-}
-
-.due-date-picker-wrap:focus-within ~ .due-date-hint {
-  color: var(--primary);
-  opacity: 1;
-}
-
 .due-date-input:not(:placeholder-shown) {
-  font-weight: 500;
-}
-
-.due-date-picker-wrap:has(.due-date-input:not(:placeholder-shown)) ~ .due-date-hint {
-  color: var(--primary);
-  opacity: 1;
   font-weight: 500;
 }
 
@@ -2190,7 +2215,7 @@ body.user-staff .bulk-actions-bar {
   gap: .4rem;
   padding: .35rem .65rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 9999px;
   background: var(--surface);
   color: var(--text);
   font-size: .85rem;
@@ -2453,6 +2478,19 @@ body.user-staff .bulk-actions-bar {
   cursor: default;
 }
 
+.viewer-comment-form textarea[readonly] {
+  background: #f8f9fa;
+  cursor: not-allowed;
+  color: var(--text-muted);
+  border-color: #e0e0e0;
+}
+
+.viewer-comment-form textarea[readonly]:focus {
+  border-color: #e0e0e0;
+  box-shadow: none;
+  outline: none;
+}
+
 .viewer-comment-form label {
   display: block;
   margin-bottom: .75rem;
@@ -2522,6 +2560,11 @@ body.user-staff .bulk-actions-bar {
 .status-badge.not-viewed {
   background: linear-gradient(135deg, rgba(245, 158, 11, .18) 0%, rgba(245, 158, 11, .1) 100%);
   color: var(--accent-yellow);
+}
+
+.status-badge.overdue {
+  background: linear-gradient(135deg, rgba(220, 38, 38, .18) 0%, rgba(220, 38, 38, .1) 100%);
+  color: var(--danger);
 }
 
 /* Priority badges (upload/document list) */

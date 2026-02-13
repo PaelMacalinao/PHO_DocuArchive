@@ -127,7 +127,7 @@
             </div>
             <div class="toolbar-actions">
               <div class="doc-search-wrap">
-                <span class="doc-search-icon" aria-hidden="true">&#128269;</span>
+                <span class="doc-search-icon" aria-hidden="true">🔎</span>
                 <input type="search" id="searchInput" class="doc-search-input" placeholder="Search document names…" autocomplete="off" aria-label="Search documents">
               </div>
               <label class="btn btn-primary toolbar-upload" id="uploadBtnWrap">
@@ -162,13 +162,11 @@
                     <th>Due Date</th>
                     <th>Status</th>
                     <th>Viewed at</th>
-                    <th>Size</th>
                     <th>Date</th>
-                    <th class="th-actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="docTableBody">
-                  <tr class="empty-row"><td colspan="11">Select a folder or upload documents to get started.</td></tr>
+                  <tr class="empty-row"><td colspan="9">Select a folder or upload documents to get started.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -329,11 +327,11 @@
           <span class="status-badge" id="viewerStatusBadge">Not viewed</span>
           <span class="viewer-viewedat" id="viewerViewedAt">Viewed at: —</span>
           <button type="button" class="viewer-comment-trigger" id="viewerCommentTrigger" aria-expanded="false" aria-controls="viewerCommentFormWrap" title="Click to open or close comment" style="display:none;">
-            <span class="viewer-comment-trigger-icon" aria-hidden="true">💬</span>
+            <span class="viewer-comment-trigger-icon" aria-hidden="true">📝</span>
             <span class="viewer-comment-trigger-label">Comment</span>
           </button>
           <a id="viewerOpenNewTab" class="btn btn-ghost btn-sm" href="#" target="_blank" rel="noopener" style="display:none;">Open in new tab</a>
-          <a id="viewerDownloadLink" class="btn btn-outline btn-sm viewer-download" href="#" download style="display:none;">Download</a>
+          <a id="viewerDownloadLink" class="btn btn-outline btn-sm viewer-download" href="#" download style="display:none;"><span class="btn-icon">⬇</span> Download</a>
         </div>
       </div>
       <div class="viewer-comment-section" id="viewerCommentSection" hidden>
@@ -392,7 +390,6 @@
             <input type="date" id="metaDueDate" class="due-date-input" placeholder="Optional" aria-label="Due Date">
             <span class="due-date-clear" id="dueDateClear" title="Clear date" aria-label="Clear date" style="display: none;">✕</span>
           </div>
-          <span class="due-date-hint">Select a deadline for this document (optional)</span>
         </label>
         <label>
           <span>Subject</span>

@@ -203,6 +203,7 @@
     form.append('title', (payload.title || '').trim());
     form.append('fileName', (payload.fileName || '').trim());
     form.append('priority', (payload.priority || 'regular'));
+    if (payload.dueDate) form.append('dueDate', String(payload.dueDate));
     if (payload.documentId) form.append('documentId', payload.documentId);
     return fetch('api/send-notification.php', {
       method: 'POST',
@@ -672,7 +673,7 @@
       : 'No documents sent to you yet.';
 
     if (!documents.length) {
-      var colspan = admin ? 11 : 9; // 11 columns for admin, 9 for staff (no Select and Actions)
+      var colspan = admin ? 9 : 8; // 9 columns for admin (no Size, no Actions), 8 for staff (no Select, Actions, Size)
       el.docTableBody.innerHTML = '<tr class="empty-row"><td colspan="' + colspan + '">' + emptyMsg + '</td></tr>';
       if (document.getElementById('bulkActionsBar')) document.getElementById('bulkActionsBar').hidden = true;
       return;
@@ -681,6 +682,79 @@
       var p = PRIORITIES.find(function (x) { return x.value === (priority || 'regular'); }) || PRIORITIES[3];
       return '<span class="priority-badge ' + p.class + '">' + escapeHtml(p.label) + '</span>';
     }
+
+    function getDueMeta(doc) {
+      if (!doc.dueDate) {
+        return {
+          html: '—',
+          isOverdue: false,
+        };
+      }
+
+      var label = formatDate(doc.dueDate);
+      var now = new Date();
+      var due = new Date(doc.dueDate);
+      if (isNaN(due.getTime())) {
+        // Fallback: just show the raw formatted date
+        return {
+          html: escapeHtml(label),
+          isOverdue: false,
+        };
+      }
+
+      // Normalize both dates to start of day (midnight) in local timezone for accurate comparison
+      var nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var dueStart = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+      
+      // Calculate days difference
+      var diffMs = dueStart.getTime() - nowStart.getTime();
+      var daysLeft = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+      var chipText = '';
+      var chipClass = '';
+      var isOverdue = daysLeft < 0;
+
+      if (daysLeft > 1) {
+        chipText = daysLeft + ' days left';
+        chipClass = 'due-chip-ok';
+      } else if (daysLeft === 1) {
+        chipText = 'Tomorrow';
+        chipClass = 'due-chip-soon';
+      } else if (daysLeft === 0) {
+        chipText = 'Today';
+        chipClass = 'due-chip-soon';
+      } else {
+        var overdueDays = Math.abs(daysLeft);
+        chipText = 'Overdue by ' + overdueDays + ' day' + (overdueDays === 1 ? '' : 's');
+        chipClass = 'due-chip-overdue';
+      }
+
+      var html =
+        '<div class="due-cell">' +
+          '<span class="due-date-main">' + escapeHtml(label) + '</span>' +
+          '<span class="due-chip ' + chipClass + '">' + escapeHtml(chipText) + '</span>' +
+        '</div>';
+
+      return {
+        html: html,
+        isOverdue: isOverdue,
+      };
+    }
+
+    function getStatusBadge(doc) {
+      var dueMeta = getDueMeta(doc);
+      var isOverdue = dueMeta.isOverdue && !doc.viewedAt;
+
+      if (isOverdue) {
+        return '<span class="status-badge overdue">Overdue</span>';
+      }
+
+      var viewed = !!doc.viewedAt;
+      var cls = viewed ? 'viewed' : 'not-viewed';
+      var label = viewed ? 'Viewed' : 'Not viewed';
+      return '<span class="status-badge ' + cls + '">' + label + '</span>';
+    }
+
     el.docTableBody.innerHTML = documents.map(doc => `
       <tr>
         ${admin ? '<td class="doc-cell-select"><input type="checkbox" class="doc-select" data-doc-id="' + doc.id + '" title="Select"></td>' : ''}
@@ -693,24 +767,15 @@
         <td><span class="doc-desc">${escapeHtml(doc.title || '—')}</span></td>
         <td>${priorityBadge(doc.priority)}</td>
         <td><span class="doc-desc">${escapeHtml(doc.from || '—')}</span></td>
-        <td class="doc-date">${doc.dueDate ? escapeHtml(formatDate(doc.dueDate)) : '—'}</td>
-        <td>
-          <span class="status-badge ${doc.viewedAt ? 'viewed' : 'not-viewed'}">
-            ${doc.viewedAt ? 'Viewed' : 'Not viewed'}
-          </span>
-        </td>
+        <td class="doc-date">${getDueMeta(doc).html}</td>
+        <td>${getStatusBadge(doc)}</td>
         <td class="doc-date">${doc.viewedAt ? escapeHtml(formatDateTime(doc.viewedAt)) : '—'}</td>
-        <td class="doc-size">${formatSize(doc.size)}</td>
         <td class="doc-date">${formatDate(doc.createdAt)}</td>
-        ${admin ? '<td><div class="doc-actions"><button type="button" class="btn btn-ghost doc-comment" data-doc-id="' + doc.id + '" title="Comment">💬</button></div></td>' : ''}
       </tr>
     `).join('');
 
     el.docTableBody.querySelectorAll('.doc-view').forEach(link => {
       link.addEventListener('click', (e) => { e.preventDefault(); viewDocument(link.dataset.docId); });
-    });
-    el.docTableBody.querySelectorAll('.doc-comment').forEach(btn => {
-      btn.addEventListener('click', () => openCommentModal(btn.dataset.docId));
     });
     el.docTableBody.querySelectorAll('.doc-select').forEach(function (cb) {
       cb.addEventListener('change', updateBulkBar);
@@ -827,7 +892,8 @@
     if (el.viewerCommentTrigger) {
       el.viewerCommentTrigger.setAttribute('aria-expanded', 'true');
     }
-    if (el.viewerCommentText) {
+    // Only focus textarea for staff (admin is read-only)
+    if (el.viewerCommentText && !isAdmin()) {
       setTimeout(function () { el.viewerCommentText.focus(); }, 150);
     }
   }
@@ -965,7 +1031,7 @@
 
     currentViewerDocId = doc.id;
     var hasExistingComment = !!(doc.comment && String(doc.comment).trim() !== '');
-    viewerCommentSubmitted = isAdmin() || hasExistingComment;
+    viewerCommentSubmitted = isAdmin() || hasExistingComment; // Admin doesn't need to comment, staff must comment
     el.viewerModalTitle.textContent = doc.originalName || 'Document';
     el.viewerContent.innerHTML = '<div class="viewer-loading">Loading…</div>';
     renderViewerMeta(doc);
@@ -974,33 +1040,56 @@
     if (viewerDownload) { viewerDownload.style.display = 'none'; }
     if (viewerOpenNewTab) { viewerOpenNewTab.style.display = 'none'; }
     if (el.viewerCommentSection) {
-      if (isAdmin()) {
-        el.viewerCommentSection.hidden = true;
-        if (el.viewerCommentTrigger) el.viewerCommentTrigger.style.display = 'none';
-      } else {
-        el.viewerCommentSection.hidden = true;
-        el.viewerCommentSection.classList.toggle('viewer-comment-has-existing', hasExistingComment);
-        if (el.viewerCommentTrigger) el.viewerCommentTrigger.style.display = '';
-        if (el.viewerCommentFormWrap) {
-          el.viewerCommentFormWrap.hidden = true;
-          el.viewerCommentFormWrap.classList.remove('viewer-comment-form-expanded');
-        }
-        el.viewerCommentSection.classList.remove('viewer-comment-form-expanded');
-        if (el.viewerCommentTrigger) el.viewerCommentTrigger.setAttribute('aria-expanded', 'false');
-        if (el.viewerCommentText) {
-          el.viewerCommentText.value = doc.comment || '';
+      el.viewerCommentSection.hidden = false;
+      el.viewerCommentSection.classList.toggle('viewer-comment-has-existing', hasExistingComment);
+      // Show comment trigger for admin if comment exists, for staff always
+      if (el.viewerCommentTrigger) {
+        el.viewerCommentTrigger.style.display = (isAdmin() ? hasExistingComment : true) ? '' : 'none';
+      }
+      if (el.viewerCommentFormWrap) {
+        el.viewerCommentFormWrap.hidden = true;
+        el.viewerCommentFormWrap.classList.remove('viewer-comment-form-expanded');
+      }
+      el.viewerCommentSection.classList.remove('viewer-comment-form-expanded');
+      if (el.viewerCommentTrigger) el.viewerCommentTrigger.setAttribute('aria-expanded', 'false');
+      if (el.viewerCommentText) {
+        el.viewerCommentText.value = doc.comment || '';
+        // Admin can only read comments, staff can write comments
+        if (isAdmin()) {
+          el.viewerCommentText.removeAttribute('required');
+          el.viewerCommentText.required = false;
+          el.viewerCommentText.readOnly = true;
+          el.viewerCommentText.placeholder = hasExistingComment ? 'Staff comment (read-only)' : 'No comment yet';
+          // Update label to show it's read-only for admin
+          var label = el.viewerCommentForm ? el.viewerCommentForm.querySelector('.viewer-comment-label') : null;
+          if (label) {
+            var requiredSpan = label.querySelector('.required');
+            if (requiredSpan) requiredSpan.textContent = '(read-only)';
+          }
+        } else {
           if (hasExistingComment) {
             el.viewerCommentText.removeAttribute('required');
             el.viewerCommentText.required = false;
             el.viewerCommentText.readOnly = true;
+            el.viewerCommentText.placeholder = 'Type your comment here...';
           } else {
             el.viewerCommentText.setAttribute('required', 'required');
             el.viewerCommentText.required = true;
             el.viewerCommentText.readOnly = false;
+            el.viewerCommentText.placeholder = 'Type your comment here...';
+            // Ensure label shows required for staff
+            var label = el.viewerCommentForm ? el.viewerCommentForm.querySelector('.viewer-comment-label') : null;
+            if (label) {
+              var requiredSpan = label.querySelector('.required');
+              if (requiredSpan) requiredSpan.textContent = '(required)';
+            }
           }
         }
-        var submitBtn = el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null;
-        if (submitBtn) submitBtn.style.display = hasExistingComment ? 'none' : '';
+      }
+      var submitBtn = el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null;
+      if (submitBtn) {
+        // Hide submit button for admin (read-only), show for staff only if no comment exists
+        submitBtn.style.display = (isAdmin() || hasExistingComment) ? 'none' : '';
       }
     }
     el.viewerModal.hidden = false;
@@ -1540,7 +1629,8 @@
             title: title || file.name,
             fileName: file.name,
             documentId: id,
-            priority: priority
+            priority: priority,
+            dueDate: dueDate
           }).catch(function () {});
         })
         .catch(function (err) {
@@ -1631,7 +1721,15 @@
     el.viewerCommentForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       if (!currentViewerDocId || !el.viewerCommentText) return;
+      
+      // Admin cannot submit comments (read-only)
+      if (isAdmin()) {
+        showToast('Admins can only view comments, not edit them.', 'error');
+        return;
+      }
+      
       const value = (el.viewerCommentText.value || '').trim();
+      // For staff, comment is required
       if (!value) {
         showToast('Please enter a comment before closing.');
         return;
@@ -1645,11 +1743,18 @@
         await db.saveDocument(doc);
         const inList = documents.find(function (d) { return d.id === currentViewerDocId; });
         if (inList) inList.comment = doc.comment;
-        if (!isAdmin()) {
-          await markViewed(doc);
-          renderViewerMeta(doc);
-          renderDocuments();
+        // Update UI
+        if (el.viewerCommentText) {
+          el.viewerCommentText.value = doc.comment || '';
+          el.viewerCommentText.readOnly = true;
+          el.viewerCommentText.removeAttribute('required');
+          el.viewerCommentText.required = false;
+          var submitBtn = el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null;
+          if (submitBtn) submitBtn.style.display = 'none';
         }
+        await markViewed(doc);
+        renderViewerMeta(doc);
+        renderDocuments();
         viewerCommentSubmitted = true;
         showToast('Comment saved. You may close the viewer.');
       } catch (err) {
@@ -1659,6 +1764,7 @@
   }
 
   window.addEventListener('beforeunload', function (e) {
+    // Only block closing for staff if they haven't submitted a comment
     if (!isAdmin() && currentViewerDocId && !viewerCommentSubmitted) {
       e.preventDefault();
       e.returnValue = '';
