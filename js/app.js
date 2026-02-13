@@ -90,6 +90,9 @@
     viewerStatusBadge: document.getElementById('viewerStatusBadge'),
     viewerViewedAt: document.getElementById('viewerViewedAt'),
     viewerCommentSection: document.getElementById('viewerCommentSection'),
+    viewerCommentTrigger: document.getElementById('viewerCommentTrigger'),
+    viewerCommentResizeHandle: document.getElementById('viewerCommentResizeHandle'),
+    viewerCommentFormWrap: document.getElementById('viewerCommentFormWrap'),
     viewerCommentForm: document.getElementById('viewerCommentForm'),
     viewerCommentText: document.getElementById('viewerCommentText'),
     commentModal: document.getElementById('commentModal'),
@@ -775,8 +778,63 @@
     }
   })();
 
+  var VIEWER_COMMENT_HEIGHT_DEFAULT = 220;
+  var VIEWER_COMMENT_HEIGHT_MIN = 120;
+  var VIEWER_COMMENT_HEIGHT_MAX = 0.8;
+
+  function showViewerCommentForm() {
+    if (el.viewerCommentSection) {
+      el.viewerCommentSection.hidden = false;
+      el.viewerCommentSection.classList.remove('viewer-comment-minimized');
+      el.viewerCommentSection.classList.add('viewer-comment-form-expanded');
+      var h = el.viewerCommentSection.style.height;
+      if (!h || h === '') {
+        el.viewerCommentSection.style.height = VIEWER_COMMENT_HEIGHT_DEFAULT + 'px';
+      }
+      el.viewerCommentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    if (el.viewerCommentFormWrap) {
+      el.viewerCommentFormWrap.hidden = false;
+      el.viewerCommentFormWrap.classList.add('viewer-comment-form-expanded');
+    }
+    if (el.viewerCommentTrigger) {
+      el.viewerCommentTrigger.setAttribute('aria-expanded', 'true');
+    }
+    if (el.viewerCommentText) {
+      setTimeout(function () { el.viewerCommentText.focus(); }, 150);
+    }
+  }
+
+  function setViewerCommentMinimized(minimized) {
+    if (!el.viewerCommentSection) return;
+    if (minimized) {
+      el.viewerCommentSection.classList.add('viewer-comment-minimized');
+      el.viewerCommentSection.hidden = true;
+      el.viewerCommentSection.style.height = '';
+      if (el.viewerCommentFormWrap) {
+        el.viewerCommentFormWrap.hidden = true;
+        el.viewerCommentFormWrap.classList.remove('viewer-comment-form-expanded');
+      }
+      el.viewerCommentSection.classList.remove('viewer-comment-form-expanded');
+      if (el.viewerCommentTrigger) el.viewerCommentTrigger.setAttribute('aria-expanded', 'false');
+    } else {
+      el.viewerCommentSection.classList.remove('viewer-comment-minimized');
+    }
+  }
+
+  function isViewerCommentMinimized() {
+    return el.viewerCommentSection && el.viewerCommentSection.classList.contains('viewer-comment-minimized');
+  }
+
   function tryCloseViewer() {
     if (!isAdmin() && currentViewerDocId && !viewerCommentSubmitted) {
+      showViewerCommentForm();
+      if (el.viewerCommentSection) {
+        el.viewerCommentSection.classList.add('viewer-comment-auto-popped');
+        setTimeout(function () {
+          if (el.viewerCommentSection) el.viewerCommentSection.classList.remove('viewer-comment-auto-popped');
+        }, 2000);
+      }
       showToast('Please submit a comment before closing.');
       return;
     }
@@ -794,7 +852,21 @@
     if (viewerOpenNewTab) { viewerOpenNewTab.removeAttribute('href'); viewerOpenNewTab.style.display = 'none'; }
     currentViewerDocId = null;
     viewerCommentSubmitted = false;
-    if (el.viewerCommentSection) el.viewerCommentSection.hidden = true;
+    if (el.viewerCommentSection) {
+      el.viewerCommentSection.hidden = true;
+      el.viewerCommentSection.classList.remove('viewer-comment-minimized');
+      el.viewerCommentSection.classList.remove('viewer-comment-auto-popped');
+      el.viewerCommentSection.style.height = '';
+    }
+    if (el.viewerCommentFormWrap) {
+      el.viewerCommentFormWrap.hidden = true;
+      el.viewerCommentFormWrap.classList.remove('viewer-comment-form-expanded');
+    }
+    if (el.viewerCommentSection) el.viewerCommentSection.classList.remove('viewer-comment-form-expanded');
+    if (el.viewerCommentTrigger) {
+      el.viewerCommentTrigger.setAttribute('aria-expanded', 'false');
+      el.viewerCommentTrigger.style.display = 'none';
+    }
     if (el.viewerCommentForm) el.viewerCommentForm.reset();
     if (el.viewerCommentText) el.viewerCommentText.removeAttribute('required');
     el.viewerContent.innerHTML = '';
@@ -865,7 +937,8 @@
     }
 
     currentViewerDocId = doc.id;
-    viewerCommentSubmitted = false;
+    var hasExistingComment = !!(doc.comment && String(doc.comment).trim() !== '');
+    viewerCommentSubmitted = isAdmin() || hasExistingComment;
     el.viewerModalTitle.textContent = doc.originalName || 'Document';
     el.viewerContent.innerHTML = '<div class="viewer-loading">Loading…</div>';
     renderViewerMeta(doc);
@@ -876,13 +949,31 @@
     if (el.viewerCommentSection) {
       if (isAdmin()) {
         el.viewerCommentSection.hidden = true;
+        if (el.viewerCommentTrigger) el.viewerCommentTrigger.style.display = 'none';
       } else {
-        el.viewerCommentSection.hidden = false;
+        el.viewerCommentSection.hidden = true;
+        el.viewerCommentSection.classList.toggle('viewer-comment-has-existing', hasExistingComment);
+        if (el.viewerCommentTrigger) el.viewerCommentTrigger.style.display = '';
+        if (el.viewerCommentFormWrap) {
+          el.viewerCommentFormWrap.hidden = true;
+          el.viewerCommentFormWrap.classList.remove('viewer-comment-form-expanded');
+        }
+        el.viewerCommentSection.classList.remove('viewer-comment-form-expanded');
+        if (el.viewerCommentTrigger) el.viewerCommentTrigger.setAttribute('aria-expanded', 'false');
         if (el.viewerCommentText) {
           el.viewerCommentText.value = doc.comment || '';
-          el.viewerCommentText.setAttribute('required', 'required');
-          el.viewerCommentText.required = true;
+          if (hasExistingComment) {
+            el.viewerCommentText.removeAttribute('required');
+            el.viewerCommentText.required = false;
+            el.viewerCommentText.readOnly = true;
+          } else {
+            el.viewerCommentText.setAttribute('required', 'required');
+            el.viewerCommentText.required = true;
+            el.viewerCommentText.readOnly = false;
+          }
         }
+        var submitBtn = el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null;
+        if (submitBtn) submitBtn.style.display = hasExistingComment ? 'none' : '';
       }
     }
     el.viewerModal.hidden = false;
@@ -900,8 +991,11 @@
       if (viewerObjectUrl) URL.revokeObjectURL(viewerObjectUrl);
       viewerObjectUrl = URL.createObjectURL(blob);
       var mime = (doc.mimeType || blob.type || '').toLowerCase();
+      var name = (doc.originalName || '').toLowerCase();
       var isImage = mime.indexOf('image/') === 0;
       var isPdf = mime.indexOf('application/pdf') === 0;
+      var isDocx = mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        name.slice(-5) === '.docx' || (name.slice(-4) === '.doc' && mime.indexOf('wordprocessing') !== -1);
 
       if (!isAdmin()) {
         addHistory({
@@ -916,20 +1010,37 @@
       el.viewerContent.innerHTML = '';
       var wrap = document.createElement('div');
       wrap.className = 'viewer-preview-wrap';
-      var previewUrl = viewerObjectUrl + (isPdf ? '#toolbar=1' : '');
 
-      if (isImage) {
-        var img = document.createElement('img');
-        img.className = 'viewer-preview-img';
-        img.alt = doc.originalName || '';
-        img.src = viewerObjectUrl;
-        wrap.appendChild(img);
+      if (isDocx) {
+        el.viewerContent.innerHTML = '<div class="viewer-loading">Loading document…</div>';
+        try {
+          var arrayBuffer = await blob.arrayBuffer();
+          var mammothResult = await (window.mammoth && window.mammoth.convertToHtml ? window.mammoth.convertToHtml({ arrayBuffer: arrayBuffer }) : Promise.reject(new Error('DOCX viewer not loaded')));
+          el.viewerContent.innerHTML = '';
+          wrap.classList.add('viewer-docx-wrap');
+          var docxInner = document.createElement('div');
+          docxInner.className = 'viewer-docx-content';
+          docxInner.innerHTML = mammothResult.value;
+          wrap.appendChild(docxInner);
+        } catch (docxErr) {
+          el.viewerContent.innerHTML = '<div class="viewer-loading viewer-loading-error">Could not display Word document. You can download it instead.</div>';
+          return;
+        }
       } else {
-        var iframe = document.createElement('iframe');
-        iframe.className = 'viewer-preview-frame';
-        iframe.title = doc.originalName || 'Document';
-        iframe.src = previewUrl;
-        wrap.appendChild(iframe);
+        var previewUrl = viewerObjectUrl + (isPdf ? '#toolbar=1' : '');
+        if (isImage) {
+          var img = document.createElement('img');
+          img.className = 'viewer-preview-img';
+          img.alt = doc.originalName || '';
+          img.src = viewerObjectUrl;
+          wrap.appendChild(img);
+        } else {
+          var iframe = document.createElement('iframe');
+          iframe.className = 'viewer-preview-frame';
+          iframe.title = doc.originalName || 'Document';
+          iframe.src = previewUrl;
+          wrap.appendChild(iframe);
+        }
       }
 
       el.viewerContent.appendChild(wrap);
@@ -942,7 +1053,6 @@
         viewerOpenNewTab.href = viewerObjectUrl;
         viewerOpenNewTab.style.display = isAdmin() ? '' : 'none';
       }
-      if (!isAdmin() && el.viewerCommentText) setTimeout(function () { el.viewerCommentText.focus(); }, 100);
     } catch (e) {
       el.viewerContent.innerHTML = '<div class="viewer-loading viewer-loading-error">' + (e.message || 'Could not open file') + '</div>';
     }
@@ -1394,6 +1504,63 @@
       if (e.key === 'Escape') closeCommentModal();
     });
   }
+
+  function isViewerCommentFormExpanded() {
+    return el.viewerCommentFormWrap && !el.viewerCommentFormWrap.hidden &&
+      el.viewerCommentFormWrap.classList.contains('viewer-comment-form-expanded');
+  }
+
+  if (el.viewerCommentTrigger) {
+    el.viewerCommentTrigger.addEventListener('click', function () {
+      if (isViewerCommentFormExpanded()) {
+        setViewerCommentMinimized(true);
+        return;
+      }
+      showViewerCommentForm();
+    });
+    el.viewerCommentTrigger.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      if (isViewerCommentFormExpanded()) {
+        setViewerCommentMinimized(true);
+        return;
+      }
+      showViewerCommentForm();
+    });
+  }
+
+  (function setupViewerCommentResize() {
+    var handle = el.viewerCommentResizeHandle;
+    var section = el.viewerCommentSection;
+    if (!handle || !section) return;
+    var startY = 0;
+    var startHeight = 0;
+    function onMove(e) {
+      var deltaY = e.clientY - startY;
+      var maxPx = typeof VIEWER_COMMENT_HEIGHT_MAX === 'number' && VIEWER_COMMENT_HEIGHT_MAX > 1
+        ? VIEWER_COMMENT_HEIGHT_MAX
+        : Math.floor(window.innerHeight * VIEWER_COMMENT_HEIGHT_MAX);
+      var newHeight = Math.max(VIEWER_COMMENT_HEIGHT_MIN, Math.min(maxPx, startHeight - deltaY));
+      section.style.height = newHeight + 'px';
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    }
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      if (isViewerCommentMinimized()) return;
+      if (!el.viewerCommentFormWrap || el.viewerCommentFormWrap.hidden) return;
+      startY = e.clientY;
+      startHeight = section.offsetHeight;
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'ns-resize';
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  })();
 
   if (el.viewerCommentForm) {
     el.viewerCommentForm.addEventListener('submit', async function (e) {

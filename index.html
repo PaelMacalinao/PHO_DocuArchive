@@ -291,18 +291,25 @@
         <div class="viewer-meta">
           <span class="status-badge" id="viewerStatusBadge">Not viewed</span>
           <span class="viewer-viewedat" id="viewerViewedAt">Viewed at: —</span>
+          <button type="button" class="viewer-comment-trigger" id="viewerCommentTrigger" aria-expanded="false" aria-controls="viewerCommentFormWrap" title="Click to open or close comment" style="display:none;">
+            <span class="viewer-comment-trigger-icon" aria-hidden="true">💬</span>
+            <span class="viewer-comment-trigger-label">Comment</span>
+          </button>
           <a id="viewerOpenNewTab" class="btn btn-ghost btn-sm" href="#" target="_blank" rel="noopener" style="display:none;">Open in new tab</a>
           <a id="viewerDownloadLink" class="btn btn-outline btn-sm viewer-download" href="#" download style="display:none;">Download</a>
         </div>
       </div>
       <div class="viewer-comment-section" id="viewerCommentSection" hidden>
-        <form id="viewerCommentForm" class="viewer-comment-form">
-          <label>
-            <span class="viewer-comment-label">Comment <span class="required" aria-hidden="true">(required)</span></span>
-            <textarea id="viewerCommentText" rows="3" placeholder="Type your comment here..." required></textarea>
-          </label>
-          <button type="submit" class="btn btn-primary">Submit comment</button>
-        </form>
+        <div class="viewer-comment-resize-handle" id="viewerCommentResizeHandle" title="Drag to resize" aria-hidden="true"></div>
+        <div class="viewer-comment-form-wrap" id="viewerCommentFormWrap" role="region" aria-label="Comment form" hidden>
+          <form id="viewerCommentForm" class="viewer-comment-form">
+            <label>
+              <span class="viewer-comment-label">Comment <span class="required" aria-hidden="true">(required)</span></span>
+              <textarea id="viewerCommentText" rows="3" placeholder="Type your comment here..." required></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary">Submit comment</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -409,6 +416,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="js/db-api.js?v=2"></script>
+  <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="js/firebase-config.js?v=2"></script>
