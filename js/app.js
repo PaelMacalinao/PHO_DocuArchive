@@ -117,6 +117,13 @@
     metaSubject: document.getElementById('metaSubject'),
     metaPriority: document.getElementById('metaPriority'),
     userRoleLabel: document.getElementById('userRoleLabel'),
+    userSettingsGroup: document.getElementById('userSettingsGroup'),
+    usersList: document.getElementById('usersList'),
+    addUserBtn: document.getElementById('addUserBtn'),
+    addUserModal: document.getElementById('addUserModal'),
+    addUserForm: document.getElementById('addUserForm'),
+    newUserEmail: document.getElementById('newUserEmail'),
+    newUserName: document.getElementById('newUserName'),
     userEmailLabel: document.getElementById('userEmailLabel'),
     toast: document.getElementById('toast')
   };
@@ -375,6 +382,14 @@
     var admin = isAdmin();
     document.body.classList.toggle('user-staff', !admin);
 
+    // Show/hide User Settings section for admin
+    if (el.userSettingsGroup) {
+      el.userSettingsGroup.style.display = admin ? 'block' : 'none';
+      if (admin && el.usersList) {
+        loadUsers();
+      }
+    }
+
     // Toolbar: always show (staff get Refresh only). Upload and upload zone: admin only
     var toolbarActions = document.querySelector('#panelDashboard .toolbar-actions');
     if (toolbarActions) toolbarActions.style.display = '';
@@ -439,6 +454,9 @@
     if (el.panelSettings) el.panelSettings.hidden = view !== 'settings';
     if (el.panelProfile) el.panelProfile.hidden = view !== 'profile';
     if (view === 'history' && isAdmin()) loadHistory();
+    if (view === 'settings' && isAdmin() && el.usersList) {
+      loadUsers();
+    }
   }
 
   function uuid() {
@@ -654,7 +672,8 @@
       : 'No documents sent to you yet.';
 
     if (!documents.length) {
-      el.docTableBody.innerHTML = '<tr class="empty-row"><td colspan="11">' + emptyMsg + '</td></tr>';
+      var colspan = admin ? 11 : 9; // 11 columns for admin, 9 for staff (no Select and Actions)
+      el.docTableBody.innerHTML = '<tr class="empty-row"><td colspan="' + colspan + '">' + emptyMsg + '</td></tr>';
       if (document.getElementById('bulkActionsBar')) document.getElementById('bulkActionsBar').hidden = true;
       return;
     }
@@ -664,7 +683,7 @@
     }
     el.docTableBody.innerHTML = documents.map(doc => `
       <tr>
-        ${admin ? '<td class="doc-cell-select"><input type="checkbox" class="doc-select" data-doc-id="' + doc.id + '" title="Select"></td>' : '<td class="doc-cell-select"></td>'}
+        ${admin ? '<td class="doc-cell-select"><input type="checkbox" class="doc-select" data-doc-id="' + doc.id + '" title="Select"></td>' : ''}
         <td>
           <div class="doc-name">
             <span class="doc-name-icon">${fileIcon(doc.originalName)}</span>
@@ -683,11 +702,7 @@
         <td class="doc-date">${doc.viewedAt ? escapeHtml(formatDateTime(doc.viewedAt)) : '—'}</td>
         <td class="doc-size">${formatSize(doc.size)}</td>
         <td class="doc-date">${formatDate(doc.createdAt)}</td>
-        <td>
-          <div class="doc-actions">
-            ${admin ? '<button type="button" class="btn btn-ghost doc-comment" data-doc-id="' + doc.id + '" title="Comment">💬</button>' : ''}
-          </div>
-        </td>
+        ${admin ? '<td><div class="doc-actions"><button type="button" class="btn btn-ghost doc-comment" data-doc-id="' + doc.id + '" title="Comment">💬</button></div></td>' : ''}
       </tr>
     `).join('');
 
@@ -1859,5 +1874,160 @@
     } else {
       showLoginScreen();
     }
+  }
+
+  // ----- User Management -----
+  async function loadUsers() {
+    if (!el.usersList || !isAdmin()) return;
+    try {
+      el.usersList.innerHTML = '<div class="users-loading">Loading users...</div>';
+      var users = await db.getUsers();
+      if (!users || users.length === 0) {
+        el.usersList.innerHTML = '<div class="users-empty">No users found. Add a user to get started.</div>';
+        return;
+      }
+      el.usersList.innerHTML = users.map(function (user) {
+        var email = escapeHtml(user.email || '');
+        var name = escapeHtml(user.name || '');
+        var role = user.role || 'staff';
+        var roleClass = role === 'admin' ? 'admin' : 'staff';
+        var roleLabel = role === 'admin' ? 'Admin' : 'Staff';
+        var lastLogin = user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Never';
+        var canDelete = user.email !== ADMIN_EMAIL; // Don't allow deleting admin account
+        return '<div class="user-item">' +
+          '<div class="user-item-info">' +
+          '<div class="user-item-email">' + email + '</div>' +
+          (name ? '<div class="user-item-name">' + name + '</div>' : '') +
+          '<div class="user-item-meta">' +
+          '<span class="user-item-role ' + roleClass + '">' + roleLabel + '</span>' +
+          '<span>Last login: ' + lastLogin + '</span>' +
+          '</div>' +
+          '</div>' +
+          '<div class="user-item-actions">' +
+          (canDelete ? '<button type="button" class="btn btn-danger btn-sm user-item-delete" data-email="' + email + '" title="Delete user">Delete</button>' : '') +
+          '</div>' +
+          '</div>';
+      }).join('');
+      el.usersList.querySelectorAll('.user-item-delete').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var email = btn.getAttribute('data-email');
+          if (email && confirm('Delete user "' + email + '"? This cannot be undone.')) {
+            deleteUser(email);
+          }
+        });
+      });
+    } catch (e) {
+      el.usersList.innerHTML = '<div class="users-empty" style="color: var(--danger);">Error loading users: ' + escapeHtml(e.message || 'Unknown error') + '</div>';
+    }
+  }
+
+  async function deleteUser(email) {
+    if (!isAdmin()) return;
+    try {
+      await db.deleteUser(email);
+      showToast('User deleted successfully.');
+      loadUsers();
+    } catch (e) {
+      showToast(e.message || 'Failed to delete user', 'error');
+    }
+  }
+
+  if (el.addUserBtn) {
+    el.addUserBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isAdmin()) {
+        showToast('Only admins can add users', 'error');
+        return;
+      }
+      if (el.addUserModal) {
+        el.addUserModal.hidden = false;
+        if (el.newUserEmail) {
+          setTimeout(function () { el.newUserEmail.focus(); }, 100);
+        }
+      } else {
+        console.error('Add user modal not found');
+      }
+    });
+  }
+
+  // Close add user modal handlers
+  document.querySelectorAll('[data-close="addUser"]').forEach(function (node) {
+    node.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (el.addUserModal) el.addUserModal.hidden = true;
+      if (el.addUserForm) el.addUserForm.reset();
+    });
+  });
+
+  if (el.addUserModal) {
+    el.addUserModal.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        el.addUserModal.hidden = true;
+        if (el.addUserForm) el.addUserForm.reset();
+      }
+    });
+    // Close when clicking backdrop (but not the form itself)
+    el.addUserModal.addEventListener('click', function (e) {
+      if (e.target === el.addUserModal) {
+        el.addUserModal.hidden = true;
+        if (el.addUserForm) el.addUserForm.reset();
+      }
+    });
+    // Prevent form clicks from closing modal
+    if (el.addUserForm) {
+      el.addUserForm.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+    }
+  }
+
+  if (el.addUserForm) {
+    el.addUserForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isAdmin()) {
+        showToast('Only admins can add users', 'error');
+        return;
+      }
+      if (!el.newUserEmail) {
+        showToast('Email input not found', 'error');
+        return;
+      }
+      var email = (el.newUserEmail.value || '').trim().toLowerCase();
+      var name = (el.newUserName && el.newUserName.value || '').trim();
+      if (!email) {
+        showToast('Email address is required', 'error');
+        el.newUserEmail.focus();
+        return;
+      }
+      if (!isValidEmail(email)) {
+        showToast('Please enter a valid email address', 'error');
+        el.newUserEmail.focus();
+        return;
+      }
+      if (email === ADMIN_EMAIL) {
+        showToast('Cannot add admin email as a user', 'error');
+        return;
+      }
+      try {
+        if (!db || typeof db.saveUser !== 'function') {
+          throw new Error('Database not available');
+        }
+        await db.saveUser({
+          email: email,
+          name: name || null,
+          role: 'staff'
+        });
+        showToast('User added successfully. They can now log in with their email.');
+        if (el.addUserModal) el.addUserModal.hidden = true;
+        if (el.addUserForm) el.addUserForm.reset();
+        loadUsers();
+      } catch (e) {
+        console.error('Add user error:', e);
+        showToast(e.message || 'Failed to add user', 'error');
+      }
+    });
   }
 })();

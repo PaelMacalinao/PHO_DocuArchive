@@ -318,6 +318,18 @@ try {
       break;
     }
 
+    case 'deleteUser': {
+      $email = strtolower(trim($input['email'] ?? ''));
+      if ($email === '') {
+        echo json_encode(['error' => 'User email required']);
+        break;
+      }
+      $st = $pdo->prepare('DELETE FROM users WHERE email = ?');
+      $st->execute([$email]);
+      echo json_encode(['ok' => true]);
+      break;
+    }
+
     default:
       echo json_encode(['error' => 'Unknown action: ' . $action]);
   }

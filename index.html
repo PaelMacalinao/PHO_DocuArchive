@@ -252,6 +252,18 @@
             </div>
           </div>
           <div class="panel-body">
+            <div class="settings-group" id="userSettingsGroup" style="display: none;">
+              <div class="settings-group-header">
+                <h3 class="settings-group-title">User Management</h3>
+                <button type="button" class="btn btn-primary btn-sm" id="addUserBtn">
+                  <span class="btn-icon">+</span> Add User
+                </button>
+              </div>
+              <p class="settings-desc">Manage staff email accounts. Users can log in directly with their email address.</p>
+              <div class="users-list" id="usersList">
+                <div class="users-loading">Loading users...</div>
+              </div>
+            </div>
             <div class="settings-group">
               <h3 class="settings-group-title">Storage</h3>
               <p class="settings-desc">Data is stored locally in your browser (IndexedDB). Clearing site data will remove all documents and folders.</p>
@@ -389,6 +401,28 @@
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" data-close="meta">Cancel</button>
           <button type="submit" class="btn btn-primary">Save &amp; Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="addUserModal" role="dialog" aria-modal="true" aria-labelledby="addUserModalTitle" hidden>
+    <div class="modal-backdrop" data-close="addUser"></div>
+    <div class="modal-box">
+      <h3 id="addUserModalTitle">Add User Account</h3>
+      <p class="modal-help">Enter an email address to create a user account. The user can log in directly with this email.</p>
+      <form id="addUserForm">
+        <label>
+          <span>Email Address</span>
+          <input type="email" id="newUserEmail" required placeholder="user@example.com" autocomplete="email">
+        </label>
+        <label>
+          <span>Full Name (optional)</span>
+          <input type="text" id="newUserName" placeholder="John Doe">
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="addUser">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add User</button>
         </div>
       </form>
     </div>

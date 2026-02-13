@@ -129,6 +129,11 @@
     return Array.isArray(data) ? data : [];
   }
 
+  async function dbDeleteUser(email) {
+    var data = await post({ action: 'deleteUser', email: email });
+    checkError(data);
+  }
+
   window.PHODB = {
     getFolders: dbGetFolders,
     saveFolder: dbSaveFolder,
@@ -144,6 +149,7 @@
     clearHistory: dbClearHistory,
     deleteHistoryByDocumentId: dbDeleteHistoryByDocumentId,
     saveUser: dbSaveUser,
-    getUsers: dbGetUsers
+    getUsers: dbGetUsers,
+    deleteUser: dbDeleteUser
   };
 })();
