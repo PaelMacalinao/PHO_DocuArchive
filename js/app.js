@@ -10,6 +10,14 @@
   var ADMIN_EMAIL = 'phoadmin';
   var ADMIN_PASSWORD = 'phoadmin';
 
+  // Priority levels with display label and CSS class for color-coding
+  var PRIORITIES = [
+    { value: 'critical', label: 'Critical', class: 'priority-critical' },
+    { value: 'urgent', label: 'Urgent', class: 'priority-urgent' },
+    { value: 'priority', label: 'Priority', class: 'priority-priority' },
+    { value: 'regular', label: 'Regular', class: 'priority-regular' }
+  ];
+
   // Predefined provincial offices (folder names only — Gmail is entered manually per upload)
   var OFFICES = [
     { name: 'Office of the Provincial Governor' },
@@ -42,6 +50,7 @@
   let uploadQueue = [];
   let pendingUpload = null;
   let currentViewerDocId = null;
+  let viewerCommentSubmitted = false;
   let currentCommentDocId = null;
   let currentUser = { email: '', role: 'staff', name: '', picture: '' };
 
@@ -80,6 +89,9 @@
     viewerContent: document.getElementById('viewerContent'),
     viewerStatusBadge: document.getElementById('viewerStatusBadge'),
     viewerViewedAt: document.getElementById('viewerViewedAt'),
+    viewerCommentSection: document.getElementById('viewerCommentSection'),
+    viewerCommentForm: document.getElementById('viewerCommentForm'),
+    viewerCommentText: document.getElementById('viewerCommentText'),
     commentModal: document.getElementById('commentModal'),
     commentForm: document.getElementById('commentForm'),
     commentFileName: document.getElementById('commentFileName'),
@@ -99,6 +111,7 @@
     metaFrom: document.getElementById('metaFrom'),
     metaReceiver: document.getElementById('metaReceiver'),
     metaSubject: document.getElementById('metaSubject'),
+    metaPriority: document.getElementById('metaPriority'),
     userRoleLabel: document.getElementById('userRoleLabel'),
     userEmailLabel: document.getElementById('userEmailLabel'),
     toast: document.getElementById('toast')
@@ -178,6 +191,7 @@
     form.append('subject', (payload.subject || '').trim());
     form.append('title', (payload.title || '').trim());
     form.append('fileName', (payload.fileName || '').trim());
+    form.append('priority', (payload.priority || 'regular'));
     if (payload.documentId) form.append('documentId', payload.documentId);
     return fetch('api/send-notification.php', {
       method: 'POST',
@@ -261,6 +275,7 @@
     if (el.dashboard) el.dashboard.style.display = '';
     var badgeWrap = document.getElementById('userBadgeWrap');
     if (badgeWrap) badgeWrap.style.display = '';
+    switchView('dashboard');
     renderUserPill();
     renderProfile();
     applyRoleUI();
@@ -343,10 +358,13 @@
 
   function applyRoleUI() {
     var admin = isAdmin();
+    document.body.classList.toggle('user-staff', !admin);
 
-    // Upload button, refresh button, and upload zone: admin only
+    // Toolbar: always show (staff get Refresh only). Upload and upload zone: admin only
     var toolbarActions = document.querySelector('#panelDashboard .toolbar-actions');
-    if (toolbarActions) toolbarActions.style.display = admin ? '' : 'none';
+    if (toolbarActions) toolbarActions.style.display = '';
+    var uploadWrap = document.getElementById('uploadBtnWrap');
+    if (uploadWrap) uploadWrap.style.display = admin ? '' : 'none';
     if (el.uploadZone) el.uploadZone.style.display = admin ? '' : 'none';
 
     // Sidebar folders: admin only
@@ -583,18 +601,55 @@
     return icons[ext] || '📎';
   }
 
+  function getSelectedDocIds() {
+    var checkboxes = document.querySelectorAll('#docTableBody .doc-select:checked');
+    return Array.from(checkboxes).map(function (cb) { return cb.dataset.docId; });
+  }
+
+  function updateBulkBar() {
+    var bar = document.getElementById('bulkActionsBar');
+    if (!bar) return;
+    if (!isAdmin()) {
+      bar.hidden = true;
+      return;
+    }
+    var label = document.getElementById('bulkActionsLabel');
+    var selectAll = document.getElementById('docSelectAll');
+    var ids = getSelectedDocIds();
+    var allCheckboxes = document.querySelectorAll('#docTableBody .doc-select');
+    if (selectAll && allCheckboxes.length) {
+      selectAll.checked = ids.length === allCheckboxes.length;
+      selectAll.indeterminate = ids.length > 0 && ids.length < allCheckboxes.length;
+    }
+    if (!bar || !label) return;
+    if (ids.length === 0) {
+      bar.hidden = true;
+      return;
+    }
+    bar.hidden = false;
+    label.textContent = ids.length + ' selected';
+  }
+
   function renderDocuments() {
     var admin = isAdmin();
+    var docTable = document.getElementById('docTable');
+    if (docTable) docTable.classList.toggle('admin-table', admin);
     var emptyMsg = admin
       ? 'No documents in this folder. Upload files to get started.'
       : 'No documents sent to you yet.';
 
     if (!documents.length) {
-      el.docTableBody.innerHTML = '<tr class="empty-row"><td colspan="10">' + emptyMsg + '</td></tr>';
+      el.docTableBody.innerHTML = '<tr class="empty-row"><td colspan="11">' + emptyMsg + '</td></tr>';
+      if (document.getElementById('bulkActionsBar')) document.getElementById('bulkActionsBar').hidden = true;
       return;
+    }
+    function priorityBadge(priority) {
+      var p = PRIORITIES.find(function (x) { return x.value === (priority || 'regular'); }) || PRIORITIES[3];
+      return '<span class="priority-badge ' + p.class + '">' + escapeHtml(p.label) + '</span>';
     }
     el.docTableBody.innerHTML = documents.map(doc => `
       <tr>
+        ${admin ? '<td class="doc-cell-select"><input type="checkbox" class="doc-select" data-doc-id="' + doc.id + '" title="Select"></td>' : '<td class="doc-cell-select"></td>'}
         <td>
           <div class="doc-name">
             <span class="doc-name-icon">${fileIcon(doc.originalName)}</span>
@@ -602,9 +657,9 @@
           </div>
         </td>
         <td><span class="doc-desc">${escapeHtml(doc.title || '—')}</span></td>
+        <td>${priorityBadge(doc.priority)}</td>
         <td><span class="doc-desc">${escapeHtml(doc.from || '—')}</span></td>
         <td><span class="doc-email">${escapeHtml(doc.toEmail || '—')}</span></td>
-        <td><span class="doc-desc">${escapeHtml(doc.subject || '—')}</span></td>
         <td>
           <span class="status-badge ${doc.viewedAt ? 'viewed' : 'not-viewed'}">
             ${doc.viewedAt ? 'Viewed' : 'Not viewed'}
@@ -615,9 +670,7 @@
         <td class="doc-date">${formatDate(doc.createdAt)}</td>
         <td>
           <div class="doc-actions">
-            <button type="button" class="btn btn-ghost doc-comment" data-doc-id="${doc.id}" title="Comment">💬</button>
-            ${admin ? '<button type="button" class="btn btn-ghost btn-danger doc-download" data-doc-id="' + doc.id + '" title="Download">↓</button>' : ''}
-            ${admin ? '<button type="button" class="btn btn-danger" data-doc-id="' + doc.id + '" data-delete title="Delete">✕</button>' : ''}
+            ${admin ? '<button type="button" class="btn btn-ghost doc-comment" data-doc-id="' + doc.id + '" title="Comment">💬</button>' : ''}
           </div>
         </td>
       </tr>
@@ -626,15 +679,108 @@
     el.docTableBody.querySelectorAll('.doc-view').forEach(link => {
       link.addEventListener('click', (e) => { e.preventDefault(); viewDocument(link.dataset.docId); });
     });
-    el.docTableBody.querySelectorAll('.doc-download').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.preventDefault(); downloadDocument(btn.dataset.docId); });
-    });
     el.docTableBody.querySelectorAll('.doc-comment').forEach(btn => {
       btn.addEventListener('click', () => openCommentModal(btn.dataset.docId));
     });
-    el.docTableBody.querySelectorAll('[data-delete]').forEach(btn => {
-      btn.addEventListener('click', () => deleteDocument(btn.dataset.docId));
+    el.docTableBody.querySelectorAll('.doc-select').forEach(function (cb) {
+      cb.addEventListener('change', updateBulkBar);
     });
+    updateBulkBar();
+  }
+
+  (function setupBulkActions() {
+    var selectAll = document.getElementById('docSelectAll');
+    var bulkBar = document.getElementById('bulkActionsBar');
+    var bulkDownloadBtn = document.getElementById('bulkDownloadBtn');
+    var bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    var bulkClearBtn = document.getElementById('bulkClearSelectionBtn');
+    if (selectAll) {
+      selectAll.addEventListener('change', function () {
+        var checked = selectAll.checked;
+        document.querySelectorAll('#docTableBody .doc-select').forEach(function (cb) { cb.checked = checked; });
+        updateBulkBar();
+      });
+    }
+    if (bulkDownloadBtn) {
+      bulkDownloadBtn.addEventListener('click', function () {
+        if (!isAdmin()) return;
+        var ids = getSelectedDocIds();
+        if (!ids.length) return;
+        (function next(i) {
+          if (i >= ids.length) {
+            showToast('Downloaded ' + ids.length + ' file(s).', 'success');
+            document.querySelectorAll('#docTableBody .doc-select:checked').forEach(function (cb) { cb.checked = false; });
+            var sa = document.getElementById('docSelectAll'); if (sa) sa.checked = false;
+            updateBulkBar();
+            return;
+          }
+          downloadDocument(ids[i]).then(function () { setTimeout(function () { next(i + 1); }, 300); }).catch(function () { next(i + 1); });
+        })(0);
+      });
+    }
+    if (bulkDeleteBtn) {
+      bulkDeleteBtn.addEventListener('click', function () {
+        if (!isAdmin()) return;
+        var ids = getSelectedDocIds();
+        if (!ids.length) return;
+        if (!confirm('Delete ' + ids.length + ' selected document(s)? This cannot be undone.')) return;
+        (async function () {
+          for (var i = 0; i < ids.length; i++) {
+            try {
+              await db.deleteDocument(ids[i]);
+              await db.deleteHistoryByDocumentId(ids[i]);
+            } catch (_) {}
+          }
+          showToast('Deleted ' + ids.length + ' document(s).');
+          loadDocuments();
+        })();
+      });
+    }
+    if (bulkClearBtn) {
+      bulkClearBtn.addEventListener('click', function () {
+        document.querySelectorAll('#docTableBody .doc-select:checked').forEach(function (cb) { cb.checked = false; });
+        var sa = document.getElementById('docSelectAll'); if (sa) sa.checked = false;
+        updateBulkBar();
+      });
+    }
+  })();
+
+  (function setupSidebarToggle() {
+    var SIDEBAR_COLLAPSED_KEY = 'PHO_DocuArchive_SidebarCollapsed';
+    var main = document.getElementById('mainLayout');
+    var toggleBtn = document.getElementById('sidebarToggle');
+    var iconEl = toggleBtn ? toggleBtn.querySelector('.header-menu-toggle-icon') : null;
+    function isCollapsed() { return main && main.classList.contains('sidebar-collapsed'); }
+    function setCollapsed(collapsed) {
+      if (!main) return;
+      if (collapsed) {
+        main.classList.add('sidebar-collapsed');
+        if (toggleBtn) toggleBtn.setAttribute('title', 'Expand sidebar');
+        if (iconEl) iconEl.textContent = '\u2630';
+      } else {
+        main.classList.remove('sidebar-collapsed');
+        if (toggleBtn) toggleBtn.setAttribute('title', 'Collapse sidebar');
+        if (iconEl) iconEl.textContent = '\u2630';
+      }
+      try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0'); } catch (_) {}
+    }
+    try {
+      var saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+      if (saved === '1') setCollapsed(true);
+    } catch (_) {}
+    if (toggleBtn && main) {
+      toggleBtn.addEventListener('click', function () {
+        setCollapsed(!isCollapsed());
+      });
+    }
+  })();
+
+  function tryCloseViewer() {
+    if (!isAdmin() && currentViewerDocId && !viewerCommentSubmitted) {
+      showToast('Please submit a comment before closing.');
+      return;
+    }
+    closeViewer();
   }
 
   function closeViewer() {
@@ -647,6 +793,10 @@
     if (viewerDownload) { viewerDownload.removeAttribute('href'); viewerDownload.style.display = 'none'; }
     if (viewerOpenNewTab) { viewerOpenNewTab.removeAttribute('href'); viewerOpenNewTab.style.display = 'none'; }
     currentViewerDocId = null;
+    viewerCommentSubmitted = false;
+    if (el.viewerCommentSection) el.viewerCommentSection.hidden = true;
+    if (el.viewerCommentForm) el.viewerCommentForm.reset();
+    if (el.viewerCommentText) el.viewerCommentText.removeAttribute('required');
     el.viewerContent.innerHTML = '';
     el.viewerModal.hidden = true;
   }
@@ -715,6 +865,7 @@
     }
 
     currentViewerDocId = doc.id;
+    viewerCommentSubmitted = false;
     el.viewerModalTitle.textContent = doc.originalName || 'Document';
     el.viewerContent.innerHTML = '<div class="viewer-loading">Loading…</div>';
     renderViewerMeta(doc);
@@ -722,6 +873,18 @@
     var viewerOpenNewTab = document.getElementById('viewerOpenNewTab');
     if (viewerDownload) { viewerDownload.style.display = 'none'; }
     if (viewerOpenNewTab) { viewerOpenNewTab.style.display = 'none'; }
+    if (el.viewerCommentSection) {
+      if (isAdmin()) {
+        el.viewerCommentSection.hidden = true;
+      } else {
+        el.viewerCommentSection.hidden = false;
+        if (el.viewerCommentText) {
+          el.viewerCommentText.value = doc.comment || '';
+          el.viewerCommentText.setAttribute('required', 'required');
+          el.viewerCommentText.required = true;
+        }
+      }
+    }
     el.viewerModal.hidden = false;
 
     try {
@@ -747,8 +910,7 @@
           documentName: doc.originalName,
           folderName: getFolderNameById(doc.folderId)
         });
-        await markViewed(doc);
-        renderDocuments();
+        /* Mark as viewed only after staff submits a comment (see viewerCommentForm submit) */
       }
 
       el.viewerContent.innerHTML = '';
@@ -774,12 +936,13 @@
       if (viewerDownload) {
         viewerDownload.href = viewerObjectUrl;
         viewerDownload.download = doc.originalName || 'download';
-        viewerDownload.style.display = '';
+        viewerDownload.style.display = isAdmin() ? '' : 'none';
       }
       if (viewerOpenNewTab) {
         viewerOpenNewTab.href = viewerObjectUrl;
-        viewerOpenNewTab.style.display = '';
+        viewerOpenNewTab.style.display = isAdmin() ? '' : 'none';
       }
+      if (!isAdmin() && el.viewerCommentText) setTimeout(function () { el.viewerCommentText.focus(); }, 100);
     } catch (e) {
       el.viewerContent.innerHTML = '<div class="viewer-loading viewer-loading-error">' + (e.message || 'Could not open file') + '</div>';
     }
@@ -1019,6 +1182,7 @@
     el.metaFrom.selectedIndex = 0; // reset to "Select office…"
     if (el.metaReceiver) el.metaReceiver.selectedIndex = 0;
     el.metaSubject.value = '';
+    if (el.metaPriority) el.metaPriority.value = 'regular';
     el.metaModal.hidden = false;
     el.metaTitle.focus();
   }
@@ -1141,7 +1305,6 @@
         return;
       }
 
-      var gmailValue = (el.metaGmail ? el.metaGmail.value : '').trim();
       var receiverEmail = (el.metaReceiver ? el.metaReceiver.value : '').trim();
       if (!isValidEmail(receiverEmail)) {
         showToast('Please select a valid receiver email.', 'error');
@@ -1153,6 +1316,7 @@
       const id = uuid();
       const title = (el.metaTitle.value || '').trim();
       const subject = (el.metaSubject.value || '').trim();
+      const priority = (el.metaPriority && el.metaPriority.value) ? el.metaPriority.value : 'regular';
       const toEmail = normalizeEmail(receiverEmail);
       const fromOffice = office.name;
 
@@ -1166,6 +1330,7 @@
         mimeType: file.type || 'application/octet-stream',
         size: file.size,
         title: title || null,
+        priority: priority,
         from: fromOffice,
         to: null,
         toEmail: toEmail,
@@ -1199,7 +1364,8 @@
             subject: subject,
             title: title || file.name,
             fileName: file.name,
-            documentId: id
+            documentId: id,
+            priority: priority
           }).catch(function () {});
         })
         .catch(function (err) {
@@ -1212,11 +1378,11 @@
   }
 
   document.querySelectorAll('[data-close="viewer"]').forEach(function (node) {
-    node.addEventListener('click', closeViewer);
+    node.addEventListener('click', tryCloseViewer);
   });
 
   el.viewerModal.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeViewer();
+    if (e.key === 'Escape') tryCloseViewer();
   });
 
   document.querySelectorAll('[data-close="comment"]').forEach(function (node) {
@@ -1228,6 +1394,45 @@
       if (e.key === 'Escape') closeCommentModal();
     });
   }
+
+  if (el.viewerCommentForm) {
+    el.viewerCommentForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!currentViewerDocId || !el.viewerCommentText) return;
+      const value = (el.viewerCommentText.value || '').trim();
+      if (!value) {
+        showToast('Please enter a comment before closing.');
+        return;
+      }
+      try {
+        let doc = documents.find(function (d) { return d.id === currentViewerDocId; });
+        if (!doc) doc = await db.getDocument(currentViewerDocId);
+        if (!doc) throw new Error('Document not found');
+        if (!canCommentDoc(doc)) throw new Error('You are not allowed to comment on this document.');
+        doc.comment = value || null;
+        await db.saveDocument(doc);
+        const inList = documents.find(function (d) { return d.id === currentViewerDocId; });
+        if (inList) inList.comment = doc.comment;
+        if (!isAdmin()) {
+          await markViewed(doc);
+          renderViewerMeta(doc);
+          renderDocuments();
+        }
+        viewerCommentSubmitted = true;
+        showToast('Comment saved. You may close the viewer.');
+      } catch (err) {
+        showToast(err.message || 'Failed to save comment', 'error');
+      }
+    });
+  }
+
+  window.addEventListener('beforeunload', function (e) {
+    if (!isAdmin() && currentViewerDocId && !viewerCommentSubmitted) {
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    }
+  });
 
   if (el.commentForm) {
     el.commentForm.addEventListener('submit', async function (e) {

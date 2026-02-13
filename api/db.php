@@ -45,6 +45,7 @@ function rowToDocument($row) {
     'mimeType' => $row['mime_type'] ?? null,
     'size' => isset($row['size']) ? (int) $row['size'] : null,
     'title' => $row['title'] ?? null,
+    'priority' => $row['priority'] ?? 'regular',
     'from' => $row['from'] ?? null,
     'toEmail' => $row['to_email'] ?? null,
     'subject' => $row['subject'] ?? null,
@@ -186,11 +187,11 @@ try {
         break;
       }
       $st = $pdo->prepare('
-        INSERT INTO documents (id, folder_id, original_name, mime_type, size, title, `from`, to_email, subject, description, status, viewed_at, comment, created_by_email, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO documents (id, folder_id, original_name, mime_type, size, title, priority, `from`, to_email, subject, description, status, viewed_at, comment, created_by_email, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
         folder_id = VALUES(folder_id), original_name = VALUES(original_name), mime_type = VALUES(mime_type), size = VALUES(size),
-        title = VALUES(title), `from` = VALUES(`from`), to_email = VALUES(to_email), subject = VALUES(subject), description = VALUES(description),
+        title = VALUES(title), priority = VALUES(priority), `from` = VALUES(`from`), to_email = VALUES(to_email), subject = VALUES(subject), description = VALUES(description),
         status = VALUES(status), viewed_at = VALUES(viewed_at), comment = VALUES(comment), created_by_email = VALUES(created_by_email), created_at = VALUES(created_at)
       ');
       $st->execute([
@@ -200,6 +201,7 @@ try {
         $doc['mimeType'] ?? 'application/octet-stream',
         isset($doc['size']) ? (int) $doc['size'] : null,
         $doc['title'] ?? null,
+        $doc['priority'] ?? 'regular',
         $doc['from'] ?? null,
         $doc['toEmail'] ?? null,
         $doc['subject'] ?? null,

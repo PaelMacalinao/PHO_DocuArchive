@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS documents (
   mime_type VARCHAR(128) DEFAULT 'application/octet-stream',
   size BIGINT DEFAULT NULL,
   title VARCHAR(512) DEFAULT NULL,
+  priority VARCHAR(32) DEFAULT 'regular',
   `from` VARCHAR(255) DEFAULT NULL,
   to_email VARCHAR(255) DEFAULT NULL,
   subject VARCHAR(512) DEFAULT NULL,
@@ -56,3 +57,6 @@ CREATE TABLE IF NOT EXISTS history (
 
 -- File content is stored on disk in api/uploads/ (filename = document id)
 -- Ensure that folder exists and is writable by the web server.
+--
+-- If you already have the documents table, add the priority column with:
+-- ALTER TABLE documents ADD COLUMN priority VARCHAR(32) DEFAULT 'regular' AFTER title;

@@ -3,23 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>PHO Document Archive | Palawan Health Office</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
   <div class="dashboard">
     <header class="header">
       <div class="header-inner">
-        <div class="logo">
+        <div class="header-brand">
+          <button type="button" class="header-menu-toggle" id="sidebarToggle" title="Toggle menu" aria-label="Toggle menu">
+            <span class="header-menu-toggle-icon" aria-hidden="true">&#9776;</span>
+          </button>
+          <div class="logo">
           <img src="img/pho-logo.png" alt="PHO Logo" class="logo-img">
           <div class="logo-text">
             <h1>Palawan Health Office</h1>
             <p>Document Archive</p>
           </div>
           <img src="img/palawan-logo.png" alt="Province of Palawan Logo" class="logo-img">
+          </div>
         </div>
         <div class="header-actions">
           <div class="realtime-clock" id="realtimeClock">
@@ -49,8 +57,8 @@
       </div>
     </header>
 
-    <main class="main">
-      <aside class="sidebar">
+    <main class="main" id="mainLayout">
+      <aside class="sidebar" id="sidebar">
         <nav class="nav-main" aria-label="Main navigation">
           <a href="#" class="nav-link active" data-view="dashboard">
             <span class="nav-icon">&#128200;</span>
@@ -97,7 +105,7 @@
               <p class="card-subtitle">View and manage your archived files</p>
             </div>
             <div class="toolbar-actions">
-              <label class="btn btn-primary">
+              <label class="btn btn-primary toolbar-upload" id="uploadBtnWrap">
                 <input type="file" id="fileInput" multiple hidden>
                 <span class="btn-icon">&#8613;</span> Upload
               </label>
@@ -111,15 +119,22 @@
             <p>Drag files here or click <strong>Upload</strong> to add documents</p>
           </div>
           <div class="doc-section">
+            <div class="bulk-actions-bar" id="bulkActionsBar" hidden>
+              <span class="bulk-actions-label" id="bulkActionsLabel">0 selected</span>
+              <button type="button" class="btn btn-outline btn-sm" id="bulkDownloadBtn">Download selected</button>
+              <button type="button" class="btn btn-danger btn-sm" id="bulkDeleteBtn">Delete selected</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="bulkClearSelectionBtn">Clear selection</button>
+            </div>
             <div class="doc-list-wrap">
               <table class="doc-table" id="docTable">
                 <thead>
                   <tr>
+                    <th class="th-select"><input type="checkbox" id="docSelectAll" title="Select all"></th>
                     <th>File Name</th>
                     <th>Title</th>
+                    <th>Priority</th>
                     <th>From</th>
                     <th>Mail To:</th>
-                    <th>Subject</th>
                     <th>Status</th>
                     <th>Viewed at</th>
                     <th>Size</th>
@@ -128,7 +143,7 @@
                   </tr>
                 </thead>
                 <tbody id="docTableBody">
-                  <tr class="empty-row"><td colspan="9">Select a folder or upload documents to get started.</td></tr>
+                  <tr class="empty-row"><td colspan="11">Select a folder or upload documents to get started.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -280,6 +295,15 @@
           <a id="viewerDownloadLink" class="btn btn-outline btn-sm viewer-download" href="#" download style="display:none;">Download</a>
         </div>
       </div>
+      <div class="viewer-comment-section" id="viewerCommentSection" hidden>
+        <form id="viewerCommentForm" class="viewer-comment-form">
+          <label>
+            <span class="viewer-comment-label">Comment <span class="required" aria-hidden="true">(required)</span></span>
+            <textarea id="viewerCommentText" rows="3" placeholder="Type your comment here..." required></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary">Submit comment</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -296,6 +320,15 @@
         <label>
           <span>Title</span>
           <input type="text" id="metaTitle" required placeholder="e.g. Barangay Health Report - Q1 2026">
+        </label>
+        <label>
+          <span>Priority</span>
+          <select id="metaPriority" required>
+            <option value="regular" selected>Regular</option>
+            <option value="priority">Priority</option>
+            <option value="urgent">Urgent</option>
+            <option value="critical">Critical</option>
+          </select>
         </label>
         <label>
           <span>From (Office)</span>
@@ -375,11 +408,11 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/db-api.js"></script>
+  <script src="js/db-api.js?v=2"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-  <script src="js/firebase-config.js"></script>
-  <script src="js/firebase-auth.js"></script>
-  <script src="js/app.js?v=9"></script>
+  <script src="js/firebase-config.js?v=2"></script>
+  <script src="js/firebase-auth.js?v=2"></script>
+  <script src="js/app.js?v=2"></script>
 </body>
 </html>

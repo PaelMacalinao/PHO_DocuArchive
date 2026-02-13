@@ -27,6 +27,7 @@ $subject = isset($_POST['subject']) ? trim((string) $_POST['subject']) : '';
 $title = isset($_POST['title']) ? trim((string) $_POST['title']) : '';
 $fileName = isset($_POST['fileName']) ? trim((string) $_POST['fileName']) : '';
 $documentId = isset($_POST['documentId']) ? trim((string) $_POST['documentId']) : '';
+$priority = isset($_POST['priority']) ? trim((string) $_POST['priority']) : 'regular';
 
 if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
   echo json_encode(['ok' => false, 'error' => 'Invalid recipient email']);
@@ -48,6 +49,9 @@ $viewLink = $siteUrl . '/';
 // Plain-text fallback
 $emailBody = "Palawan Health Office – Document Archive\n\n";
 $emailBody .= "A new document has been shared with you.\n\n";
+$priorityLabels = ['critical' => 'Critical', 'urgent' => 'Urgent', 'priority' => 'Priority', 'regular' => 'Regular'];
+$priorityLabel = $priorityLabels[$priority] ?? 'Regular';
+$emailBody .= "Priority: " . $priorityLabel . "\n";
 $emailBody .= "Title: " . ($title ?: '—') . "\n";
 $emailBody .= "File: " . ($fileName ?: '—') . "\n";
 if ($subject) $emailBody .= "Subject: " . $subject . "\n";
@@ -60,6 +64,8 @@ $titleEsc = htmlspecialchars($title ?: $fileName, ENT_QUOTES, 'UTF-8');
 $fileNameEsc = htmlspecialchars($fileName ?: '—', ENT_QUOTES, 'UTF-8');
 $subjectEsc = htmlspecialchars($subject ?: '—', ENT_QUOTES, 'UTF-8');
 $viewLinkEsc = htmlspecialchars($viewLink, ENT_QUOTES, 'UTF-8');
+$priorityColor = ['critical' => '#b91c1c', 'urgent' => '#c2410c', 'priority' => '#1d4ed8', 'regular' => '#4b5563'][$priority] ?? '#4b5563';
+$priorityEsc = htmlspecialchars($priorityLabel, ENT_QUOTES, 'UTF-8');
 
 $emailBodyHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;font-family:\'Segoe UI\',Tahoma,Geneva,Verdana,sans-serif;background-color:#f4f6f8;">';
 $emailBodyHtml .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:32px 16px;">';
@@ -78,6 +84,7 @@ $emailBodyHtml .= '<p style="margin:0 0 20px;font-size:16px;line-height:1.6;colo
 $emailBodyHtml .= '<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#4a5568;">A document has been shared with you through the Palawan Health Office Document Archive. Please review the details below and open the archive when you are ready to view or download the file.</p>';
 
 $emailBodyHtml .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;margin-bottom:28px;">';
+$emailBodyHtml .= '<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#718096;">Priority</td><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:' . $priorityColor . ';">' . $priorityEsc . '</span></td></tr>';
 $emailBodyHtml .= '<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#718096;">Title</td><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#2d3748;font-weight:500;">' . $titleEsc . '</td></tr>';
 $emailBodyHtml .= '<tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#718096;">File</td><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#2d3748;">' . $fileNameEsc . '</td></tr>';
 $emailBodyHtml .= '<tr><td style="padding:16px 20px;font-size:13px;color:#718096;">Subject</td><td style="padding:16px 20px;font-size:14px;color:#2d3748;">' . $subjectEsc . '</td></tr>';
