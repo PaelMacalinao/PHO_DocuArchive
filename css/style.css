@@ -815,6 +815,9 @@ body.user-staff .bulk-actions-bar {
   border-bottom: 1px solid var(--border-light);
   flex-wrap: wrap;
 }
+.bulk-actions-bar[hidden] {
+  display: none !important;
+}
 .bulk-actions-label {
   font-size: .875rem;
   font-weight: 600;
@@ -1503,19 +1506,23 @@ body.user-staff .bulk-actions-bar {
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
+  overflow: hidden;
 }
 
 .viewer-content .viewer-preview-img {
   max-width: 100%;
   max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  object-position: center;
   display: block;
 }
 
 .viewer-content .viewer-preview-frame {
   flex: 1;
   width: 100%;
-  min-height: 300px;
+  min-height: 0;
   height: 100%;
   border: none;
   background: #fff;

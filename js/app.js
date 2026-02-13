@@ -1027,7 +1027,7 @@
           return;
         }
       } else {
-        var previewUrl = viewerObjectUrl + (isPdf ? '#toolbar=1' : '');
+        var previewUrl = viewerObjectUrl + (isPdf ? '#view=Fit&toolbar=1' : '');
         if (isImage) {
           var img = document.createElement('img');
           img.className = 'viewer-preview-img';
