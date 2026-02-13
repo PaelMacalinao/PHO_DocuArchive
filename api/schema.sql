@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS documents (
   priority VARCHAR(32) DEFAULT 'regular',
   `from` VARCHAR(255) DEFAULT NULL,
   to_email VARCHAR(255) DEFAULT NULL,
+  due_date VARCHAR(32) DEFAULT NULL,
   subject VARCHAR(512) DEFAULT NULL,
   description VARCHAR(512) DEFAULT NULL,
   status VARCHAR(32) DEFAULT 'not_viewed',
@@ -60,3 +61,5 @@ CREATE TABLE IF NOT EXISTS history (
 --
 -- If you already have the documents table, add the priority column with:
 -- ALTER TABLE documents ADD COLUMN priority VARCHAR(32) DEFAULT 'regular' AFTER title;
+-- Add due date column:
+-- ALTER TABLE documents ADD COLUMN due_date VARCHAR(32) DEFAULT NULL AFTER to_email;

@@ -28,6 +28,7 @@
   --shadow-xl: 0 20px 60px rgba(0,0,0,.12);
   --font-sans: 'DM Sans', system-ui, sans-serif;
   --font-serif: 'Libre Baskerville', Georgia, serif;
+  --font-heading: var(--font-serif);
 }
 
 * {
@@ -170,7 +171,7 @@ body {
 }
 
 .logo-text h1 {
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--text);
@@ -219,6 +220,7 @@ body {
 }
 
 .user-badge-role {
+  font-family: var(--font-heading);
   font-size: .75rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -272,6 +274,7 @@ body {
 }
 
 .user-dropdown-role {
+  font-family: var(--font-heading);
   font-size: .7rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -480,6 +483,7 @@ body {
 }
 
 .sidebar-title {
+  font-family: var(--font-heading);
   font-size: .7rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -551,6 +555,7 @@ body {
 }
 
 .folder-link {
+  font-family: var(--font-heading);
   display: flex;
   align-items: center;
   gap: .6rem;
@@ -644,6 +649,7 @@ body {
 }
 
 .card-title {
+  font-family: var(--font-heading);
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text);
@@ -666,6 +672,65 @@ body {
   align-items: center;
   gap: .5rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.toolbar-actions .btn,
+.toolbar-actions .toolbar-upload {
+  min-height: 2.25rem;
+  box-sizing: border-box;
+}
+
+.doc-search-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  height: 2.25rem;
+  min-width: 180px;
+  max-width: 280px;
+  flex: 1 1 200px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.doc-search-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, .15);
+}
+
+.doc-search-icon {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.doc-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 .75rem 0 0;
+  border: none;
+  background: transparent;
+  font-size: .875rem;
+  font-family: inherit;
+  color: var(--text);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.doc-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.doc-search-input:focus {
+  outline: none;
 }
 
 /* ----- Buttons ----- */
@@ -819,6 +884,7 @@ body.user-staff .bulk-actions-bar {
   display: none !important;
 }
 .bulk-actions-label {
+  font-family: var(--font-heading);
   font-size: .875rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -860,7 +926,7 @@ body.user-staff .bulk-actions-bar {
 .doc-table th:nth-child(3)  { width: 12%; }  /* Title */
 .doc-table th:nth-child(4)  { width: 6%; }   /* Priority */
 .doc-table th:nth-child(5)  { width: 10%; }  /* From */
-.doc-table th:nth-child(6)  { width: 12%; }  /* Mail To */
+.doc-table th:nth-child(6)  { width: 12%; }  /* Due Date */
 .doc-table th:nth-child(7)  { width: 8%; }  /* Status */
 .doc-table th:nth-child(8)  { width: 10%; }  /* Viewed at */
 .doc-table th:nth-child(9)  { width: 6%; }  /* Size */
@@ -878,6 +944,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .doc-table th {
+  font-family: var(--font-heading);
   text-align: left;
   padding: .5rem .4rem;
   font-weight: 700;
@@ -1022,6 +1089,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .settings-group-title {
+  font-family: var(--font-heading);
   font-size: .95rem;
   font-weight: 600;
   color: var(--text);
@@ -1047,6 +1115,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .profile-avatar {
+  font-family: var(--font-heading);
   width: 64px;
   height: 64px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent-gold) 50%, var(--accent-yellow) 100%);
@@ -1063,6 +1132,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .profile-org {
+  font-family: var(--font-heading);
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);
@@ -1089,6 +1159,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .history-badge {
+  font-family: var(--font-heading);
   display: inline-block;
   padding: .35rem .75rem;
   border-radius: 8px;
@@ -1205,6 +1276,7 @@ body.user-staff .bulk-actions-bar {
 .hf-delete { background: linear-gradient(135deg, rgba(198, 40, 40, .14), rgba(198, 40, 40, .06)); }
 
 .hf-count {
+  font-family: var(--font-heading);
   font-size: 1.35rem;
   font-weight: 700;
   color: var(--text);
@@ -1212,6 +1284,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .hf-label {
+  font-family: var(--font-heading);
   font-size: .72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1255,6 +1328,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .hdf-label span {
+  font-family: var(--font-heading);
   font-size: .72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1343,6 +1417,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .modal-file-label {
+  font-family: var(--font-heading);
   font-size: .75rem;
   font-weight: 700;
   letter-spacing: .08em;
@@ -1351,6 +1426,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .modal-file-name {
+  font-family: var(--font-heading);
   font-size: .95rem;
   font-weight: 600;
   color: var(--text);
@@ -1360,6 +1436,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .modal-box h3 {
+  font-family: var(--font-heading);
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.25rem;
@@ -1372,6 +1449,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .modal-box label span {
+  font-family: var(--font-heading);
   display: block;
   font-size: .8rem;
   font-weight: 500;
@@ -1464,6 +1542,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .viewer-title {
+  font-family: var(--font-heading);
   margin: 0;
   font-size: .95rem;
   font-weight: 600;
@@ -1880,6 +1959,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .viewer-comment-label {
+  font-family: var(--font-heading);
   display: block;
   font-size: .8rem;
   font-weight: 600;
@@ -1977,6 +2057,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .viewer-comment label span {
+  font-family: var(--font-heading);
   display: block;
   font-size: .8rem;
   font-weight: 600;
@@ -2103,6 +2184,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .login-logo {
+  font-family: var(--font-heading);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2119,7 +2201,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .login-title {
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text);
@@ -2127,6 +2209,7 @@ body.user-staff .bulk-actions-bar {
 }
 
 .login-subtitle {
+  font-family: var(--font-heading);
   font-size: .95rem;
   color: var(--primary);
   font-weight: 600;

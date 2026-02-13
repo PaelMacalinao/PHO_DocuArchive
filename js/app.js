@@ -113,6 +113,7 @@
     metaTitle: document.getElementById('metaTitle'),
     metaFrom: document.getElementById('metaFrom'),
     metaReceiver: document.getElementById('metaReceiver'),
+    metaDueDate: document.getElementById('metaDueDate'),
     metaSubject: document.getElementById('metaSubject'),
     metaPriority: document.getElementById('metaPriority'),
     userRoleLabel: document.getElementById('userRoleLabel'),
@@ -662,7 +663,7 @@
         <td><span class="doc-desc">${escapeHtml(doc.title || '—')}</span></td>
         <td>${priorityBadge(doc.priority)}</td>
         <td><span class="doc-desc">${escapeHtml(doc.from || '—')}</span></td>
-        <td><span class="doc-email">${escapeHtml(doc.toEmail || '—')}</span></td>
+        <td class="doc-date">${doc.dueDate ? escapeHtml(formatDate(doc.dueDate)) : '—'}</td>
         <td>
           <span class="status-badge ${doc.viewedAt ? 'viewed' : 'not-viewed'}">
             ${doc.viewedAt ? 'Viewed' : 'Not viewed'}
@@ -1291,6 +1292,7 @@
     el.metaTitle.value = '';
     el.metaFrom.selectedIndex = 0; // reset to "Select office…"
     if (el.metaReceiver) el.metaReceiver.selectedIndex = 0;
+    if (el.metaDueDate) el.metaDueDate.value = '';
     el.metaSubject.value = '';
     if (el.metaPriority) el.metaPriority.value = 'regular';
     el.metaModal.hidden = false;
@@ -1429,6 +1431,8 @@
       const priority = (el.metaPriority && el.metaPriority.value) ? el.metaPriority.value : 'regular';
       const toEmail = normalizeEmail(receiverEmail);
       const fromOffice = office.name;
+      const dueDateRaw = el.metaDueDate && el.metaDueDate.value ? el.metaDueDate.value.trim() : '';
+      const dueDate = dueDateRaw ? dueDateRaw : null;
 
       // Auto-assign to the matching office folder
       var targetFolderId = getOfficeFolderId(fromOffice) || currentFolderId || null;
@@ -1444,6 +1448,7 @@
         from: fromOffice,
         to: null,
         toEmail: toEmail,
+        dueDate: dueDate,
         subject: subject || null,
         description: subject || null,
         status: 'not_viewed',

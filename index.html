@@ -105,6 +105,10 @@
               <p class="card-subtitle">View and manage your archived files</p>
             </div>
             <div class="toolbar-actions">
+              <div class="doc-search-wrap">
+                <span class="doc-search-icon" aria-hidden="true">&#128269;</span>
+                <input type="search" id="searchInput" class="doc-search-input" placeholder="Search document names…" autocomplete="off" aria-label="Search documents">
+              </div>
               <label class="btn btn-primary toolbar-upload" id="uploadBtnWrap">
                 <input type="file" id="fileInput" multiple hidden>
                 <span class="btn-icon">&#8613;</span> Upload
@@ -134,7 +138,7 @@
                     <th>Title</th>
                     <th>Priority</th>
                     <th>From</th>
-                    <th>Mail To:</th>
+                    <th>Due Date</th>
                     <th>Status</th>
                     <th>Viewed at</th>
                     <th>Size</th>
@@ -348,6 +352,10 @@
           <select id="metaReceiver" required>
             <option value="" disabled selected>Select receiver…</option>
           </select>
+        </label>
+        <label>
+          <span>Due Date</span>
+          <input type="date" id="metaDueDate" placeholder="Optional">
         </label>
         <label>
           <span>Subject</span>
