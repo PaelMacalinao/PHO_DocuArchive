@@ -11,8 +11,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=3">
+  <style>
+    #appLoader{position:fixed;inset:0;z-index:999999;background:#f5f7f2;display:flex;align-items:center;justify-content:center}
+  </style>
 </head>
 <body>
+  <div id="appLoader" class="app-loader" role="status" aria-label="Loading">
+    <div class="app-loader-inner">
+      <div class="app-loader-logo-wrap">
+        <img src="img/pho-logo.png" alt="" class="app-loader-logo" width="140" height="140">
+        <div class="app-loader-logo-glow"></div>
+      </div>
+      <p class="app-loader-brand">Palawan Health Office</p>
+      <p class="app-loader-product">Document Archive</p>
+      <div class="app-loader-skeleton">
+        <div class="app-loader-line app-loader-line-1"></div>
+        <div class="app-loader-line app-loader-line-2"></div>
+        <div class="app-loader-line app-loader-line-3"></div>
+      </div>
+      <div class="app-loader-progress">
+        <div class="app-loader-progress-bar"></div>
+      </div>
+    </div>
+  </div>
   <div class="dashboard">
     <header class="header">
       <div class="header-inner">

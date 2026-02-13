@@ -261,7 +261,17 @@
     }
   }
 
+  function hideAppLoader() {
+    var loader = document.getElementById('appLoader');
+    if (!loader) return;
+    loader.classList.add('app-loader-hidden');
+    setTimeout(function () {
+      if (loader.parentNode) loader.parentNode.removeChild(loader);
+    }, 450);
+  }
+
   function showLoginScreen() {
+    hideAppLoader();
     if (el.loginScreen) el.loginScreen.hidden = false;
     if (el.dashboard) el.dashboard.style.display = 'none';
     var badgeWrap = document.getElementById('userBadgeWrap');
@@ -275,6 +285,7 @@
   }
 
   function hideLoginScreen() {
+    hideAppLoader();
     if (el.loginScreen) el.loginScreen.hidden = true;
     if (el.dashboard) el.dashboard.style.display = '';
     var badgeWrap = document.getElementById('userBadgeWrap');
@@ -1745,6 +1756,7 @@
   }
 
   // --- Startup ---
+  setTimeout(hideAppLoader, 4000);
   if (useFirebase) {
     var loginDivider = document.getElementById('loginDivider');
     var googleSignInBtn = document.getElementById('googleSignInBtn');

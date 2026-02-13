@@ -46,6 +46,130 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ----- App loading screen (Facebook-style + PHO branding) ----- */
+.app-loader {
+  background: linear-gradient(160deg, #f5f7f2 0%, #e8f0e4 50%, #e0eadc 100%) !important;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.app-loader.app-loader-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.app-loader-inner {
+  text-align: center;
+  padding: 2rem;
+  max-width: 320px;
+}
+
+.app-loader-logo-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.25rem;
+}
+
+.app-loader-logo {
+  display: block;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  border: none;
+  animation: appLoaderLogoPulse 1.8s ease-in-out infinite;
+}
+
+.app-loader-logo-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(46, 125, 50, 0.2) 0%, transparent 70%);
+  animation: appLoaderGlow 2s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes appLoaderLogoPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 0.95; }
+}
+
+@keyframes appLoaderGlow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.app-loader-brand {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.2rem;
+  letter-spacing: 0.02em;
+}
+
+.app-loader-product {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 1.5rem;
+}
+
+.app-loader-skeleton {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.app-loader-line {
+  height: 12px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--border-light) 0%,
+    var(--border) 25%,
+    var(--border-light) 50%,
+    var(--border) 75%,
+    var(--border-light) 100%
+  );
+  background-size: 200% 100%;
+  animation: appLoaderShimmer 1.4s ease-in-out infinite;
+}
+
+.app-loader-line-1 { width: 92%; margin-left: 0; }
+.app-loader-line-2 { width: 78%; margin-left: 4%; }
+.app-loader-line-3 { width: 85%; margin-left: 2%; }
+
+.app-loader-line-2 { animation-delay: 0.15s; }
+.app-loader-line-3 { animation-delay: 0.3s; }
+
+@keyframes appLoaderShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.app-loader-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-light);
+  overflow: hidden;
+}
+
+.app-loader-progress-bar {
+  height: 100%;
+  width: 36%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+  animation: appLoaderProgress 1.2s ease-in-out infinite;
+}
+
+@keyframes appLoaderProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
 .dashboard {
   min-height: 100vh;
   display: flex;
