@@ -928,7 +928,7 @@
           if (el.viewerCommentSection) el.viewerCommentSection.classList.remove('viewer-comment-auto-popped');
         }, 2000);
       }
-      showToast('Please submit a comment before closing.');
+      showToast('Please submit a comment before closing.', 'error');
       return;
     }
     closeViewer();
