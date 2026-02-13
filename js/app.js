@@ -1284,6 +1284,7 @@
     if (!el.metaModal) return;
     el.metaModal.hidden = true;
     if (el.metaForm) el.metaForm.reset();
+    updateDueDateClearButton();
     pendingUpload = null;
   }
 
@@ -1303,11 +1304,28 @@
     el.metaTitle.value = '';
     el.metaFrom.selectedIndex = 0; // reset to "Select office…"
     if (el.metaReceiver) el.metaReceiver.selectedIndex = 0;
-    if (el.metaDueDate) el.metaDueDate.value = '';
+    if (el.metaDueDate) {
+      el.metaDueDate.value = '';
+      updateDueDateClearButton();
+    }
     el.metaSubject.value = '';
     if (el.metaPriority) el.metaPriority.value = 'regular';
     el.metaModal.hidden = false;
-    el.metaTitle.focus();
+    setTimeout(function () {
+      updateDueDateClearButton();
+      el.metaTitle.focus();
+    }, 50);
+  }
+
+  function updateDueDateClearButton() {
+    var dueDateInput = el.metaDueDate;
+    var clearBtn = document.getElementById('dueDateClear');
+    if (!dueDateInput || !clearBtn) return;
+    if (dueDateInput.value && dueDateInput.value.trim() !== '') {
+      clearBtn.style.display = 'flex';
+    } else {
+      clearBtn.style.display = 'none';
+    }
   }
 
   el.fileInput.addEventListener('change', function () {
@@ -1408,6 +1426,22 @@
         closeMetaModal();
         processNextUpload();
       }
+    });
+  }
+
+  if (el.metaDueDate) {
+    el.metaDueDate.addEventListener('input', updateDueDateClearButton);
+    el.metaDueDate.addEventListener('change', updateDueDateClearButton);
+  }
+
+  var dueDateClearBtn = document.getElementById('dueDateClear');
+  if (dueDateClearBtn && el.metaDueDate) {
+    dueDateClearBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      el.metaDueDate.value = '';
+      updateDueDateClearButton();
+      el.metaDueDate.focus();
     });
   }
 

@@ -374,9 +374,13 @@
             <option value="" disabled selected>Select receiver…</option>
           </select>
         </label>
-        <label>
+        <label class="due-date-label">
           <span>Due Date</span>
-          <input type="date" id="metaDueDate" placeholder="Optional">
+          <div class="due-date-picker-wrap">
+            <input type="date" id="metaDueDate" class="due-date-input" placeholder="Optional" aria-label="Due Date">
+            <span class="due-date-clear" id="dueDateClear" title="Clear date" aria-label="Clear date" style="display: none;">✕</span>
+          </div>
+          <span class="due-date-hint">Select a deadline for this document (optional)</span>
         </label>
         <label>
           <span>Subject</span>

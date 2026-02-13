@@ -1040,22 +1040,34 @@ body.user-staff .bulk-actions-bar {
 .doc-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: .8rem;
+  font-size: 13px;
   table-layout: fixed;
+  min-width: 1500px;
 }
 
-/* Column widths: 11 columns (Select + 10) – Select only visible for admin */
-.doc-table th:nth-child(1)  { width: 3%; }   /* Select */
-.doc-table th:nth-child(2)  { width: 20%; }  /* File Name */
-.doc-table th:nth-child(3)  { width: 12%; }  /* Title */
-.doc-table th:nth-child(4)  { width: 6%; }   /* Priority */
-.doc-table th:nth-child(5)  { width: 10%; }  /* From */
-.doc-table th:nth-child(6)  { width: 12%; }  /* Due Date */
-.doc-table th:nth-child(7)  { width: 8%; }  /* Status */
-.doc-table th:nth-child(8)  { width: 10%; }  /* Viewed at */
-.doc-table th:nth-child(9)  { width: 6%; }  /* Size */
-.doc-table th:nth-child(10) { width: 8%; }  /* Date */
-.doc-table th:nth-child(11) { width: 5%; }  /* Actions */
+/* Column widths: 11 columns (Select + 10) – Fixed pixel widths, locked */
+.doc-table th:nth-child(1),
+.doc-table td:nth-child(1)  { width: 45px; min-width: 45px; max-width: 45px; }   /* Select */
+.doc-table th:nth-child(2),
+.doc-table td:nth-child(2)  { width: 300px; min-width: 300px; max-width: 300px; }  /* File Name */
+.doc-table th:nth-child(3),
+.doc-table td:nth-child(3)  { width: 180px; min-width: 180px; max-width: 180px; }  /* Title */
+.doc-table th:nth-child(4),
+.doc-table td:nth-child(4)  { width: 90px; min-width: 90px; max-width: 90px; }   /* Priority */
+.doc-table th:nth-child(5),
+.doc-table td:nth-child(5)  { width: 150px; min-width: 150px; max-width: 150px; }  /* From */
+.doc-table th:nth-child(6),
+.doc-table td:nth-child(6)  { width: 180px; min-width: 180px; max-width: 180px; }  /* Due Date */
+.doc-table th:nth-child(7),
+.doc-table td:nth-child(7)  { width: 120px; min-width: 120px; max-width: 120px; }  /* Status */
+.doc-table th:nth-child(8),
+.doc-table td:nth-child(8)  { width: 150px; min-width: 150px; max-width: 150px; }  /* Viewed at */
+.doc-table th:nth-child(9),
+.doc-table td:nth-child(9)  { width: 90px; min-width: 90px; max-width: 90px; }  /* Size */
+.doc-table th:nth-child(10),
+.doc-table td:nth-child(10) { width: 120px; min-width: 120px; max-width: 120px; }  /* Date */
+.doc-table th:nth-child(11),
+.doc-table td:nth-child(11) { width: 75px; min-width: 75px; max-width: 75px; }  /* Actions */
 
 /* Hide Select and Actions columns for non-admin (staff view); same column widths as admin */
 .doc-table:not(.admin-table) th.th-select,
@@ -1070,37 +1082,45 @@ body.user-staff .bulk-actions-bar {
 .doc-table th {
   font-family: var(--font-heading);
   text-align: left;
-  padding: .5rem .4rem;
+  padding: 8px 6px;
   font-weight: 700;
   color: var(--text-muted);
   background: linear-gradient(135deg, var(--bg) 0%, rgba(46, 125, 50, .03) 100%);
   border: 1px solid var(--border);
-  font-size: .7rem;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: .06em;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: normal;
+  white-space: nowrap;
   overflow: hidden;
-  min-width: 0;
+  text-overflow: ellipsis;
   box-sizing: border-box;
+  zoom: 1;
+  transform: scale(1);
 }
 
 .doc-table th.th-actions {
   text-align: right;
-  padding-right: .5rem;
+  padding-right: 8px;
 }
 
 .doc-table td {
-  padding: .5rem .4rem;
+  padding: 8px 6px;
   border: 1px solid var(--border-light);
   vertical-align: top;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  zoom: 1;
+  transform: scale(1);
+}
+
+/* Allow File Name and Title columns to wrap text within fixed widths */
+.doc-table td:nth-child(2),
+.doc-table td:nth-child(3) {
+  white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  white-space: normal;
-  overflow: hidden;
-  min-width: 0;
-  box-sizing: border-box;
 }
 
 .doc-table tbody tr {
@@ -1630,6 +1650,158 @@ body.user-staff .bulk-actions-bar {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+/* ----- Premium Due Date Picker ----- */
+.due-date-label {
+  position: relative;
+}
+
+.due-date-picker-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 2px solid #cbd5d1;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.due-date-picker-wrap:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.12), 0 0 0 1px rgba(46, 125, 50, 0.1);
+}
+
+.due-date-picker-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-bg), 0 4px 16px rgba(46, 125, 50, 0.2);
+  background: var(--surface);
+}
+
+.due-date-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  color: var(--text);
+  min-width: 0;
+  cursor: pointer;
+  font-weight: 500;
+  min-height: 48px;
+}
+
+.due-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.due-date-input::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+.due-date-input::-webkit-datetime-edit-text {
+  color: #6b7280;
+  padding: 0 0.25rem;
+  font-weight: 400;
+}
+
+.due-date-input::-webkit-datetime-edit-month-field,
+.due-date-input::-webkit-datetime-edit-day-field,
+.due-date-input::-webkit-datetime-edit-year-field {
+  color: var(--text);
+  font-weight: 600;
+  padding: 0 0.15rem;
+}
+
+.due-date-input::-webkit-datetime-edit-month-field:focus,
+.due-date-input::-webkit-datetime-edit-day-field:focus,
+.due-date-input::-webkit-datetime-edit-year-field:focus {
+  background: var(--primary-bg);
+  color: var(--primary-hover);
+  border-radius: 3px;
+  outline: none;
+}
+
+.due-date-input:focus {
+  outline: none;
+}
+
+.due-date-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+  font-weight: 400;
+}
+
+.due-date-input:not(:placeholder-shown) {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.due-date-input:invalid::-webkit-datetime-edit {
+  color: #9ca3af;
+}
+
+.due-date-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: auto 0.5rem auto 0;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  opacity: 0.8;
+  border: 1px solid #e5e7eb;
+}
+
+.due-date-clear:hover {
+  background: #fee2e2;
+  color: var(--danger);
+  border-color: #fecaca;
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(198, 40, 40, 0.15);
+}
+
+.due-date-hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: normal;
+  opacity: 0.85;
+  line-height: 1.5;
+  padding-left: 0.25rem;
+}
+
+.due-date-picker-wrap:focus-within ~ .due-date-hint {
+  color: var(--primary);
+  opacity: 1;
+}
+
+.due-date-input:not(:placeholder-shown) {
+  font-weight: 500;
+}
+
+.due-date-picker-wrap:has(.due-date-input:not(:placeholder-shown)) ~ .due-date-hint {
+  color: var(--primary);
+  opacity: 1;
+  font-weight: 500;
 }
 
 .modal-actions {
