@@ -95,6 +95,8 @@
     viewerCommentFormWrap: document.getElementById('viewerCommentFormWrap'),
     viewerCommentForm: document.getElementById('viewerCommentForm'),
     viewerCommentText: document.getElementById('viewerCommentText'),
+    viewerCommentSubmitBtn: document.getElementById('viewerCommentSubmitBtn'),
+    viewerCommentEditBtn: document.getElementById('viewerCommentEditBtn'),
     commentModal: document.getElementById('commentModal'),
     commentForm: document.getElementById('commentForm'),
     commentFileName: document.getElementById('commentFileName'),
@@ -1086,10 +1088,15 @@
           }
         }
       }
-      var submitBtn = el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null;
+      var submitBtn = el.viewerCommentSubmitBtn || (el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null);
+      var editBtn = el.viewerCommentEditBtn;
       if (submitBtn) {
-        // Hide submit button for admin (read-only), show for staff only if no comment exists
+        submitBtn.textContent = 'Submit comment';
+        // Admin: hide both. Staff with comment: show Edit, hide Submit. Staff without comment: show Submit, hide Edit.
         submitBtn.style.display = (isAdmin() || hasExistingComment) ? 'none' : '';
+      }
+      if (editBtn) {
+        editBtn.style.display = (!isAdmin() && hasExistingComment) ? '' : 'none';
       }
     }
     el.viewerModal.hidden = false;
@@ -1684,6 +1691,27 @@
     });
   }
 
+  if (el.viewerCommentEditBtn) {
+    el.viewerCommentEditBtn.addEventListener('click', function () {
+      if (isAdmin() || !el.viewerCommentText) return;
+      el.viewerCommentText.readOnly = false;
+      el.viewerCommentText.removeAttribute('required');
+      el.viewerCommentText.required = false;
+      el.viewerCommentEditBtn.style.display = 'none';
+      var submitBtn = el.viewerCommentSubmitBtn || (el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null);
+      if (submitBtn) {
+        submitBtn.textContent = 'Save changes';
+        submitBtn.style.display = '';
+      }
+      var label = el.viewerCommentForm ? el.viewerCommentForm.querySelector('.viewer-comment-label') : null;
+      if (label) {
+        var requiredSpan = label.querySelector('.required');
+        if (requiredSpan) requiredSpan.textContent = '(optional)';
+      }
+      setTimeout(function () { el.viewerCommentText.focus(); }, 100);
+    });
+  }
+
   (function setupViewerCommentResize() {
     var handle = el.viewerCommentResizeHandle;
     var section = el.viewerCommentSection;
@@ -1749,9 +1777,14 @@
           el.viewerCommentText.readOnly = true;
           el.viewerCommentText.removeAttribute('required');
           el.viewerCommentText.required = false;
-          var submitBtn = el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null;
-          if (submitBtn) submitBtn.style.display = 'none';
         }
+        var submitBtn = el.viewerCommentSubmitBtn || (el.viewerCommentForm ? el.viewerCommentForm.querySelector('button[type="submit"]') : null);
+        var editBtn = el.viewerCommentEditBtn;
+        if (submitBtn) {
+          submitBtn.textContent = 'Submit comment';
+          submitBtn.style.display = 'none';
+        }
+        if (editBtn) editBtn.style.display = '';
         await markViewed(doc);
         renderViewerMeta(doc);
         renderDocuments();

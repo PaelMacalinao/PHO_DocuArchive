@@ -342,7 +342,10 @@
               <span class="viewer-comment-label">Comment <span class="required" aria-hidden="true">(required)</span></span>
               <textarea id="viewerCommentText" rows="3" placeholder="Type your comment here..." required></textarea>
             </label>
-            <button type="submit" class="btn btn-primary">Submit comment</button>
+            <div class="viewer-comment-actions">
+              <button type="submit" class="btn btn-primary" id="viewerCommentSubmitBtn">Submit comment</button>
+              <button type="button" class="btn btn-ghost viewer-comment-edit-btn" id="viewerCommentEditBtn" style="display:none;">Edit</button>
+            </div>
           </form>
         </div>
       </div>

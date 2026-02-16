@@ -2530,8 +2530,20 @@ body.user-staff .bulk-actions-bar {
   box-shadow: 0 0 0 2px var(--primary-bg);
 }
 
+.viewer-comment-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .5rem;
+  flex-wrap: wrap;
+}
+
 .viewer-comment-form button[type="submit"] {
-  margin-top: .25rem;
+  margin-top: 0;
+}
+
+.viewer-comment-edit-btn {
+  font-size: .85rem;
 }
 
 .status-badge {
