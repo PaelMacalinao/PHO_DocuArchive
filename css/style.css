@@ -1086,9 +1086,7 @@ body.user-staff .bulk-actions-bar {
   .doc-table.admin-table th:nth-child(8),
   .doc-table.admin-table td:nth-child(8) { width: 11.24%; min-width: 150px; }  /* 150/1335 */
   .doc-table.admin-table th:nth-child(9),
-  .doc-table.admin-table td:nth-child(9) { display: none !important; }  /* Size - HIDDEN */
-  .doc-table.admin-table th:nth-child(10),
-  .doc-table.admin-table td:nth-child(10) { width: 8.99%; min-width: 120px; }  /* 120/1335 */
+  .doc-table.admin-table td:nth-child(9) { width: 8.99%; min-width: 120px; }   /* Date */
 }
 
 @media (min-width: 1290px) {
@@ -1116,12 +1114,10 @@ body.user-staff .bulk-actions-bar {
   .doc-table:not(.admin-table) th:nth-child(8),
   .doc-table:not(.admin-table) td:nth-child(8) { width: 11.63%; min-width: 150px; }  /* 150/1290 */
   .doc-table:not(.admin-table) th:nth-child(9),
-  .doc-table:not(.admin-table) td:nth-child(9) { display: none !important; }  /* Size - HIDDEN */
-  .doc-table:not(.admin-table) th:nth-child(10),
-  .doc-table:not(.admin-table) td:nth-child(10) { width: 9.30%; min-width: 120px; }  /* 120/1290 */
+  .doc-table:not(.admin-table) td:nth-child(9) { width: 9.30%; min-width: 120px; }   /* Date */
 }
 
-/* Column widths: 10 columns (Select + 9, Size hidden) – Fixed pixel widths, locked */
+/* Column widths: 9 columns (Select + File Name, Title, Priority, From, Due Date, Status, Viewed at, Date) */
 .doc-table th:nth-child(1),
 .doc-table td:nth-child(1)  { width: 45px; min-width: 45px; max-width: 45px; }   /* Select */
 .doc-table th:nth-child(2),
@@ -1139,9 +1135,7 @@ body.user-staff .bulk-actions-bar {
 .doc-table th:nth-child(8),
 .doc-table td:nth-child(8)  { width: 150px; min-width: 150px; max-width: 150px; }  /* Viewed at */
 .doc-table th:nth-child(9),
-.doc-table td:nth-child(9)  { width: 90px; min-width: 90px; max-width: 90px; display: none; }  /* Size - HIDDEN */
-.doc-table th:nth-child(10),
-.doc-table td:nth-child(10) { width: 120px; min-width: 120px; max-width: 120px; }  /* Date */
+.doc-table td:nth-child(9)  { width: 120px; min-width: 120px; max-width: 120px; }  /* Date */
 
 /* Hide Select column for non-admin (staff view) */
 .doc-table:not(.admin-table) th.th-select,
@@ -1152,12 +1146,6 @@ body.user-staff .bulk-actions-bar {
 /* Hide Actions column for all users (moved to viewer) */
 .doc-table th.th-actions,
 .doc-table td:nth-child(11) {
-  display: none !important;
-}
-
-/* Hide Size column for all users */
-.doc-table th:nth-child(9),
-.doc-table td:nth-child(9) {
   display: none !important;
 }
 

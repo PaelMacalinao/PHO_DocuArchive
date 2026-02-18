@@ -1864,9 +1864,9 @@
       e.preventDefault();
       var emailRaw = (el.loginEmail && el.loginEmail.value) ? el.loginEmail.value.trim() : '';
       var email = normalizeEmail(emailRaw);
-      var password = el.loginPassword ? el.loginPassword.value : '';
+      var password = (el.loginPassword && el.loginPassword.value) ? String(el.loginPassword.value).trim() : '';
 
-      // Admin: single hardcoded account (phoadmin / phoadmin)
+      // Admin: single shared account; any authorized user can log in as admin from any PC over HTTP
       if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
         saveUser({ email: ADMIN_EMAIL, role: 'admin', name: '', picture: '' });
         hideLoginScreen();
