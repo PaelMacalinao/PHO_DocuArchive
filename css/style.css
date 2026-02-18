@@ -1078,15 +1078,17 @@ body.user-staff .bulk-actions-bar {
   .doc-table.admin-table th:nth-child(4),
   .doc-table.admin-table td:nth-child(4) { width: 6.74%; min-width: 90px; }   /* 90/1335 */
   .doc-table.admin-table th:nth-child(5),
-  .doc-table.admin-table td:nth-child(5) { width: 11.24%; min-width: 150px; }  /* 150/1335 */
+  .doc-table.admin-table td:nth-child(5) { width: 11.24%; min-width: 150px; }  /* From */
   .doc-table.admin-table th:nth-child(6),
-  .doc-table.admin-table td:nth-child(6) { width: 13.48%; min-width: 180px; }  /* 180/1335 */
+  .doc-table.admin-table td:nth-child(6) { width: 10.49%; min-width: 140px; }  /* Email To */
   .doc-table.admin-table th:nth-child(7),
-  .doc-table.admin-table td:nth-child(7) { width: 8.99%; min-width: 120px; }  /* 120/1335 */
+  .doc-table.admin-table td:nth-child(7) { width: 13.48%; min-width: 180px; }  /* Due Date */
   .doc-table.admin-table th:nth-child(8),
-  .doc-table.admin-table td:nth-child(8) { width: 11.24%; min-width: 150px; }  /* 150/1335 */
+  .doc-table.admin-table td:nth-child(8) { width: 8.99%; min-width: 120px; }   /* Status */
   .doc-table.admin-table th:nth-child(9),
-  .doc-table.admin-table td:nth-child(9) { width: 8.99%; min-width: 120px; }   /* Date */
+  .doc-table.admin-table td:nth-child(9) { width: 11.24%; min-width: 150px; }  /* Viewed at */
+  .doc-table.admin-table th:nth-child(10),
+  .doc-table.admin-table td:nth-child(10) { width: 8.99%; min-width: 120px; }  /* Date */
 }
 
 @media (min-width: 1290px) {
@@ -1106,18 +1108,20 @@ body.user-staff .bulk-actions-bar {
   .doc-table:not(.admin-table) th:nth-child(4),
   .doc-table:not(.admin-table) td:nth-child(4) { width: 6.98%; min-width: 90px; }   /* 90/1290 */
   .doc-table:not(.admin-table) th:nth-child(5),
-  .doc-table:not(.admin-table) td:nth-child(5) { width: 11.63%; min-width: 150px; }  /* 150/1290 */
+  .doc-table:not(.admin-table) td:nth-child(5) { width: 11.63%; min-width: 150px; }  /* From */
   .doc-table:not(.admin-table) th:nth-child(6),
-  .doc-table:not(.admin-table) td:nth-child(6) { width: 13.95%; min-width: 180px; }  /* 180/1290 */
+  .doc-table:not(.admin-table) td:nth-child(6) { width: 10.85%; min-width: 140px; }   /* Email To */
   .doc-table:not(.admin-table) th:nth-child(7),
-  .doc-table:not(.admin-table) td:nth-child(7) { width: 9.30%; min-width: 120px; }  /* 120/1290 */
+  .doc-table:not(.admin-table) td:nth-child(7) { width: 13.95%; min-width: 180px; } /* Due Date */
   .doc-table:not(.admin-table) th:nth-child(8),
-  .doc-table:not(.admin-table) td:nth-child(8) { width: 11.63%; min-width: 150px; }  /* 150/1290 */
+  .doc-table:not(.admin-table) td:nth-child(8) { width: 9.30%; min-width: 120px; }   /* Status */
   .doc-table:not(.admin-table) th:nth-child(9),
-  .doc-table:not(.admin-table) td:nth-child(9) { width: 9.30%; min-width: 120px; }   /* Date */
+  .doc-table:not(.admin-table) td:nth-child(9) { width: 11.63%; min-width: 150px; }  /* Viewed at */
+  .doc-table:not(.admin-table) th:nth-child(10),
+  .doc-table:not(.admin-table) td:nth-child(10) { width: 9.30%; min-width: 120px; }  /* Date */
 }
 
-/* Column widths: 9 columns (Select + File Name, Title, Priority, From, Due Date, Status, Viewed at, Date) */
+/* Column widths: 10 columns (Select + File Name, Title, Priority, From, Email To, Due Date, Status, Viewed at, Date) */
 .doc-table th:nth-child(1),
 .doc-table td:nth-child(1)  { width: 45px; min-width: 45px; max-width: 45px; }   /* Select */
 .doc-table th:nth-child(2),
@@ -1129,18 +1133,25 @@ body.user-staff .bulk-actions-bar {
 .doc-table th:nth-child(5),
 .doc-table td:nth-child(5)  { width: 150px; min-width: 150px; max-width: 150px; }  /* From */
 .doc-table th:nth-child(6),
-.doc-table td:nth-child(6)  { width: 180px; min-width: 180px; max-width: 180px; }  /* Due Date */
+.doc-table td:nth-child(6)  { width: 140px; min-width: 140px; max-width: 180px; }  /* Email To */
 .doc-table th:nth-child(7),
-.doc-table td:nth-child(7)  { width: 120px; min-width: 120px; max-width: 120px; }  /* Status */
+.doc-table td:nth-child(7)  { width: 180px; min-width: 180px; max-width: 180px; }  /* Due Date */
 .doc-table th:nth-child(8),
-.doc-table td:nth-child(8)  { width: 150px; min-width: 150px; max-width: 150px; }  /* Viewed at */
+.doc-table td:nth-child(8)  { width: 120px; min-width: 120px; max-width: 120px; }  /* Status */
 .doc-table th:nth-child(9),
-.doc-table td:nth-child(9)  { width: 120px; min-width: 120px; max-width: 120px; }  /* Date */
+.doc-table td:nth-child(9)  { width: 150px; min-width: 150px; max-width: 150px; }  /* Viewed at */
+.doc-table th:nth-child(10),
+.doc-table td:nth-child(10) { width: 120px; min-width: 120px; max-width: 120px; }  /* Date */
 
 /* Hide Select column for non-admin (staff view) */
 .doc-table:not(.admin-table) th.th-select,
 .doc-table:not(.admin-table) td.doc-cell-select {
   display: none;
+}
+
+/* Hide Email To column for staff (admin only; staff rows have no Email To cell) */
+.doc-table:not(.admin-table) th:nth-child(6) {
+  display: none !important;
 }
 
 /* Hide Actions column for all users (moved to viewer) */
@@ -1187,7 +1198,8 @@ body.user-staff .bulk-actions-bar {
 
 /* Allow File Name and Title columns to wrap text within fixed widths */
 .doc-table td:nth-child(2),
-.doc-table td:nth-child(3) {
+.doc-table td:nth-child(3),
+.doc-table td .doc-email-to {
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;

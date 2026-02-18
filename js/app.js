@@ -675,7 +675,7 @@
       : 'No documents sent to you yet.';
 
     if (!documents.length) {
-      var colspan = admin ? 9 : 8; // 9 columns for admin (no Size, no Actions), 8 for staff (no Select, Actions, Size)
+      var colspan = admin ? 10 : 8; // 10 columns for admin (incl. Email To), 8 for staff (no Select, no Email To)
       el.docTableBody.innerHTML = '<tr class="empty-row"><td colspan="' + colspan + '">' + emptyMsg + '</td></tr>';
       if (document.getElementById('bulkActionsBar')) document.getElementById('bulkActionsBar').hidden = true;
       return;
@@ -769,6 +769,7 @@
         <td><span class="doc-desc">${escapeHtml(doc.title || '—')}</span></td>
         <td>${priorityBadge(doc.priority)}</td>
         <td><span class="doc-desc">${escapeHtml(doc.from || '—')}</span></td>
+        ${admin ? '<td><span class="doc-desc doc-email-to">' + escapeHtml(doc.toEmail || doc.to_email || '—') + '</span></td>' : ''}
         <td class="doc-date">${getDueMeta(doc).html}</td>
         <td>${getStatusBadge(doc)}</td>
         <td class="doc-date">${doc.viewedAt ? escapeHtml(formatDateTime(doc.viewedAt)) : '—'}</td>
