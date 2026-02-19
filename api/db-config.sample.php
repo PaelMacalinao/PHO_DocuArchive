@@ -8,6 +8,6 @@ return [
   'port'     => 3306,
   'dbname'   => 'pho_docuarchive',
   'username' => 'root',
-  'password' => '',
+  'password' => 'root',
   'charset'  => 'utf8mb4',
 ];
